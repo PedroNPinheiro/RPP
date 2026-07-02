@@ -74,8 +74,9 @@ This is a real application, not a hand-written HTML file. Target stack:
 - [x] Sync automated: one-shot `sync_worker.py` + Windows Task Scheduler every 15 min (as SYSTEM), config in `.env`, logs to `sync.log` + `sync_runs`
 - [x] Git repo on GitHub (private): `PedroNPinheiro/RPP`; Hetzner pulls via read-only deploy key
 - [x] **Backend live on Hetzner**: FastAPI returns real data — `/api/parts`, `/api/sync-status`, `/health` verified
+- [x] Backend runs as a **systemd service** (`rpp-backend`, non-root `rpp` user, auto-restart) at `/opt/rpp`; deploy = `git pull && systemctl restart rpp-backend`
 - [ ] Frontend: framework table UI (read-only Sage cols + editable team cols, sort/filter, sync banner)
-- [ ] Production pass: systemd service (non-root user), reverse proxy, HTTPS, Entra ID SSO, IP allowlist
+- [ ] Production pass: reverse proxy, HTTPS, Entra ID SSO, IP allowlist
 - [ ] Data formatting: trim Sage blanks (`' '`), tidy NUMERIC display (`1.0000…`, `0E-13`) in the UI
 - [ ] Production: read-only Sage login, rotate credentials, switch schema to prod folder
 ```
