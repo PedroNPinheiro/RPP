@@ -135,6 +135,7 @@ function renderLine(
           </td>
         );
       })}
+      <td className="filler" aria-hidden />
     </tr>
   );
 }
@@ -229,6 +230,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                   )}
                 </th>
               ))}
+              <th className="filler" aria-hidden />
             </tr>
           </thead>
           <tbody>
@@ -242,7 +244,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={cols.length}>
+                          <td colSpan={cols.length + 1}>
                             <div className="po-header-content">
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
@@ -266,7 +268,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
               : sorted.map((p) => renderLine(p, cols, false, onPatch))}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={cols.length} className="empty">
+                <td colSpan={cols.length + 1} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}

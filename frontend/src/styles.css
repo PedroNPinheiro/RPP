@@ -198,7 +198,7 @@ body {
 /* ---------- stat tiles ---------- */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 250px));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -331,9 +331,17 @@ body {
 }
 .table-scroll {
   overflow: auto;
-  max-height: calc(100vh - 300px);
-  min-height: 220px;
+  max-height: calc(100vh - 260px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--baseline) transparent;
 }
+.table-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb {
+  background: var(--baseline);
+  border-radius: 8px;
+}
+.table-scroll::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
 
 table {
   border-collapse: separate;
@@ -365,6 +373,8 @@ thead .head-row th.th-team { color: var(--team-ink); }
 thead .head-row th .sort-arrow { color: var(--accent); margin-left: 3px; }
 thead .head-row th.num { text-align: right; }
 thead .head-row th.stick { z-index: 4; }
+thead .head-row th:not(.filler):not(.stick) { width: 1%; }
+th.filler, td.filler { padding: 0; cursor: default; }
 
 tbody td {
   padding: 6px 10px;
@@ -425,6 +435,7 @@ td.stick { z-index: 1; }
 tbody tr:hover td.stick {
   background: color-mix(in srgb, var(--accent) 5%, var(--surface));
 }
+tbody td.stick-3 { font-weight: 500; }
 
 /* ---------- PO group headers ---------- */
 .po-header td {
