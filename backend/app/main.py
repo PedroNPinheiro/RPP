@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import psycopg
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,6 +11,9 @@ from .routers import health, parts
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Fail fast with the REAL error (e.g. "password authentication failed")
+    # instead of a 30s PoolTimeout on the first request if creds/DB are wrong.
+    psycopg.connect(settings.database_url, connect_timeout=5).close()
     pool.open()
     try:
         yield

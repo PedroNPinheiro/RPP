@@ -1,9 +1,15 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Absolute path to backend/.env so config loads no matter the working directory
+# (uvicorn/systemd may launch from anywhere).
+_ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8-sig", extra="ignore"
+        env_file=_ENV_FILE, env_file_encoding="utf-8-sig", extra="ignore"
     )
 
     # Postgres — the app connects locally as the least-privilege rpp_app role.
