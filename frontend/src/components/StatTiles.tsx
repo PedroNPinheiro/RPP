@@ -1,3 +1,4 @@
+import { isCompleted, isDelayed } from "../logic";
 import type { Part } from "../types";
 
 interface Props {
@@ -14,10 +15,10 @@ function compactCurrency(total: number, currency: string): string {
 }
 
 export function StatTiles({ parts }: Props) {
-  const delayed = parts.filter((p) => Number(p.delay_days) > 0).length;
-  const open = parts.filter((p) => Number(p.balance_qty) > 0).length;
+  const delayed = parts.filter(isDelayed).length;
+  const openParts = parts.filter((p) => !isCompleted(p));
   const currency = parts.find((p) => p.currency)?.currency ?? "EUR";
-  const totalValue = parts.reduce((s, p) => s + (Number(p.line_value) || 0), 0);
+  const totalValue = openParts.reduce((s, p) => s + (Number(p.line_value) || 0), 0);
 
   return (
     <div className="tiles">
@@ -28,8 +29,8 @@ export function StatTiles({ parts }: Props) {
       </div>
       <div className="tile">
         <div className="label">Open</div>
-        <div className="value">{open}</div>
-        <div className="context">awaiting receipt</div>
+        <div className="value">{openParts.length}</div>
+        <div className="context">not yet completed</div>
       </div>
       <div className="tile">
         <div className="label">Delayed</div>

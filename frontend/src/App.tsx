@@ -5,17 +5,15 @@ import { PartsTable } from "./components/PartsTable";
 import { StatTiles } from "./components/StatTiles";
 import { SyncBanner } from "./components/SyncBanner";
 
-type View = "open" | "delayed" | "all";
+import { isCompleted, isDelayed } from "./logic";
+
+type View = "open" | "delayed" | "completed" | "all";
 type Theme = "light" | "dark";
 
 function initialTheme(): Theme {
   const saved = localStorage.getItem("rpp-theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-function isCompleted(p: Part): boolean {
-  return p.qty_ordered !== null && Number(p.balance_qty) <= 0;
 }
 
 export default function App() {
@@ -62,7 +60,8 @@ export default function App() {
   const visible = useMemo(() => {
     let rows = parts;
     if (view === "open") rows = rows.filter((p) => !isCompleted(p));
-    if (view === "delayed") rows = rows.filter((p) => Number(p.delay_days) > 0 && !isCompleted(p));
+    if (view === "delayed") rows = rows.filter(isDelayed);
+    if (view === "completed") rows = rows.filter(isCompleted);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter((p) =>
@@ -76,7 +75,8 @@ export default function App() {
   const counts = useMemo(
     () => ({
       open: parts.filter((p) => !isCompleted(p)).length,
-      delayed: parts.filter((p) => Number(p.delay_days) > 0 && !isCompleted(p)).length,
+      delayed: parts.filter(isDelayed).length,
+      completed: parts.filter(isCompleted).length,
       all: parts.length,
     }),
     [parts],
@@ -116,6 +116,12 @@ export default function App() {
               </button>
               <button className={view === "delayed" ? "on" : ""} onClick={() => setView("delayed")}>
                 Delayed <span className="count">{counts.delayed}</span>
+              </button>
+              <button
+                className={view === "completed" ? "on" : ""}
+                onClick={() => setView("completed")}
+              >
+                Completed <span className="count">{counts.completed}</span>
               </button>
               <button className={view === "all" ? "on" : ""} onClick={() => setView("all")}>
                 All <span className="count">{counts.all}</span>

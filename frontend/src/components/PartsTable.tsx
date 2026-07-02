@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { COLUMNS, type Col } from "../columns";
+import { isCompleted } from "../logic";
 import type { Part } from "../types";
 import { EditableCell } from "./EditableCell";
 
@@ -58,6 +59,7 @@ function DelayCell({ part }: { part: Part }) {
   const d = part.delay_days;
   const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
   if (received) return <span className="chip ready">✓ received</span>;
+  if (isCompleted(part)) return <span className="chip ready">✓ completed</span>;
   if (d === null || d === undefined) return null;
   if (d > 0) return <span className="chip late">▲ {d}d late</span>;
   return <span className="chip neutral">on time</span>;

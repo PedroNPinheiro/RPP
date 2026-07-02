@@ -15,6 +15,7 @@ export interface Col {
 
 export const PRIORITY_OPTIONS = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];
 export const DEST_TYPE_OPTIONS = ["CSS - Stock", "CSR - Replacement"];
+export const STATUS_OPTIONS = ["Por começar", "Em progresso", "Pendente", "Completo"];
 
 // Line and Currency are merged into the PO and Value cells (rendered in
 // PartsTable), so they don't occupy their own columns.
@@ -32,7 +33,7 @@ export const COLUMNS: Col[] = [
   { key: "supplier_name", label: "Supplier", type: "text", group: "sage", ellipsis: true },
   { key: "line_site", label: "Site", type: "text", group: "sage" },
 
-  { key: "status", label: "Status", type: "text", group: "team", editable: true },
+  { key: "status", label: "Status", type: "select", group: "team", editable: true, options: STATUS_OPTIONS },
   { key: "priority", label: "Priority", type: "select", group: "team", editable: true, options: PRIORITY_OPTIONS },
   { key: "dest_type", label: "Dest Type", type: "select", group: "team", editable: true, options: DEST_TYPE_OPTIONS },
   { key: "shipping_method", label: "Shipping", type: "text", group: "team", editable: true },
