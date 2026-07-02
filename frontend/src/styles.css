@@ -18,24 +18,25 @@
   --good-wash: rgba(12, 163, 12, 0.08);
   --critical-wash: rgba(208, 59, 59, 0.08);
   --team-wash: rgba(250, 178, 25, 0.06);
+  --hover-wash: rgba(42, 120, 214, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0d0d0d;
-    --surface: #1a1a19;
-    --ink-1: #ffffff;
-    --ink-2: #c3c2b7;
-    --ink-3: #898781;
-    --grid: #2c2c2a;
-    --baseline: #383835;
-    --ring: rgba(255, 255, 255, 0.1);
-    --accent: #3987e5;
+/* dark mode is a selected option (persisted), applied via data-theme */
+:root[data-theme="dark"] {
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --ink-1: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #898781;
+  --grid: #2c2c2a;
+  --baseline: #383835;
+  --ring: rgba(255, 255, 255, 0.1);
+  --accent: #3987e5;
 
-    --good-wash: rgba(12, 163, 12, 0.14);
-    --critical-wash: rgba(208, 59, 59, 0.16);
-    --team-wash: rgba(250, 178, 25, 0.07);
-  }
+  --good-wash: rgba(12, 163, 12, 0.14);
+  --critical-wash: rgba(208, 59, 59, 0.16);
+  --team-wash: rgba(250, 178, 25, 0.07);
+  --hover-wash: rgba(57, 135, 229, 0.08);
 }
 
 /* ---------- base ---------- */
@@ -49,7 +50,7 @@ body {
 }
 
 .app {
-  max-width: 1600px;
+  max-width: 1700px;
   margin: 0 auto;
   padding: 20px 24px 32px;
 }
@@ -57,7 +58,7 @@ body {
 /* ---------- header ---------- */
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
@@ -114,13 +115,18 @@ body {
   cursor: pointer;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
+.icon-btn {
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
 
 /* ---------- stat tiles ---------- */
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .tile {
   background: var(--surface);
@@ -146,6 +152,64 @@ body {
   margin-top: 2px;
 }
 
+/* ---------- toolbar (filters in one row above the table) ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.seg {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.seg button {
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-right: 1px solid var(--grid);
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { color: var(--accent); }
+.seg button.on {
+  background: var(--hover-wash);
+  color: var(--accent);
+  font-weight: 600;
+}
+.seg .count {
+  color: var(--ink-3);
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.seg button.on .count { color: var(--accent); }
+
+.search {
+  border: 1px solid var(--ring);
+  background: var(--surface);
+  color: var(--ink-1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  min-width: 260px;
+}
+.search:focus {
+  outline: 2px solid rgba(42, 120, 214, 0.25);
+  border-color: var(--accent);
+}
+.search::placeholder { color: var(--ink-3); }
+
 /* ---------- messages ---------- */
 .error {
   background: var(--critical-wash);
@@ -167,7 +231,8 @@ body {
 }
 .table-scroll {
   overflow: auto;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 320px);
+  min-height: 200px;
 }
 
 table {
@@ -175,7 +240,7 @@ table {
   border-spacing: 0;
   width: 100%;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 /* group band above the header row */
@@ -185,26 +250,26 @@ thead .group-row th {
   z-index: 3;
   background: var(--surface);
   color: var(--ink-3);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: left;
-  padding: 8px 12px 2px;
+  padding: 7px 10px 1px;
   border-bottom: none;
 }
 thead .group-row th.gb-team { color: #a07408; }
 
 thead .head-row th {
   position: sticky;
-  top: 25px;
+  top: 22px;
   z-index: 2;
   background: var(--surface);
   color: var(--ink-2);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   text-align: left;
-  padding: 4px 12px 8px;
+  padding: 3px 10px 7px;
   border-bottom: 1px solid var(--baseline);
   cursor: pointer;
   user-select: none;
@@ -214,12 +279,12 @@ thead .head-row th .sort-arrow { color: var(--accent); margin-left: 3px; }
 thead .head-row th.num { text-align: right; }
 
 tbody td {
-  padding: 7px 12px;
+  padding: 5px 10px;
   border-bottom: 1px solid var(--grid);
   color: var(--ink-1);
 }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(42, 120, 214, 0.04); }
+tbody tr:hover td { background: var(--hover-wash); }
 
 td.num {
   text-align: right;
@@ -232,6 +297,17 @@ td.empty {
   color: var(--ink-3);
   padding: 32px;
 }
+td.ellipsis {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.line-tag {
+  color: var(--ink-3);
+  font-size: 11px;
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
 
 /* status chips — icon + label, color never alone */
 .chip {
@@ -240,7 +316,7 @@ td.empty {
   gap: 5px;
   padding: 1px 9px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -251,14 +327,14 @@ td.empty {
 /* ---------- inline editors ---------- */
 .cell-input {
   width: 100%;
-  min-width: 90px;
+  min-width: 80px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--ink-1);
-  padding: 3px 6px;
+  padding: 2px 6px;
   border-radius: 5px;
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 .cell-input:hover { border-color: var(--baseline); }
 .cell-input:focus {
@@ -269,13 +345,27 @@ td.empty {
 }
 .cell-input::placeholder { color: var(--ink-3); }
 
+.cell-select {
+  min-width: 110px;
+  appearance: auto;
+  cursor: pointer;
+}
+.cell-select option { background: var(--surface); color: var(--ink-1); }
+
 input[type="checkbox"] { accent-color: var(--accent); }
+
+/* dark-mode date picker indicator visibility */
+:root[data-theme="dark"] input[type="date"] {
+  color-scheme: dark;
+}
 
 /* footer strip under the table */
 .table-foot {
   display: flex;
   justify-content: space-between;
-  padding: 8px 14px;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 7px 12px;
   border-top: 1px solid var(--grid);
   color: var(--ink-3);
   font-size: 12px;

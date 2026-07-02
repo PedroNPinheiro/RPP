@@ -8,7 +8,7 @@ interface Props {
 }
 
 // Inline editor for a team column. Text/date commit on blur (only if changed);
-// checkbox commits immediately.
+// select and checkbox commit immediately.
 export function EditableCell({ part, col, onPatch }: Props) {
   const value = part[col.key];
 
@@ -21,6 +21,30 @@ export function EditableCell({ part, col, onPatch }: Props) {
           onPatch(part.id, { [col.key]: e.target.checked } as Partial<Part>)
         }
       />
+    );
+  }
+
+  if (col.type === "select") {
+    return (
+      <select
+        className="cell-input cell-select"
+        value={(value ?? "") as string}
+        onChange={(e) => {
+          const next = e.target.value === "" ? null : e.target.value;
+          onPatch(part.id, { [col.key]: next } as Partial<Part>);
+        }}
+      >
+        <option value="">—</option>
+        {col.options?.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+        {/* keep a legacy value visible even if it's not in the option list */}
+        {value && !col.options?.includes(String(value)) && (
+          <option value={String(value)}>{String(value)}</option>
+        )}
+      </select>
     );
   }
 

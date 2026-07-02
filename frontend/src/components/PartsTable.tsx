@@ -5,6 +5,7 @@ import { EditableCell } from "./EditableCell";
 
 interface Props {
   parts: Part[];
+  totalCount: number;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
 }
 
@@ -34,6 +35,17 @@ function fmtNumber(v: unknown): string {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
 }
 
+function fmtCurrency(v: unknown, currency: string | null): string {
+  if (v === null || v === undefined || v === "") return "";
+  const n = Number(v);
+  if (Number.isNaN(n)) return String(v);
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: currency || "EUR",
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
 function displayValue(part: Part, col: Col): string {
   const v = part[col.key];
   if (v === null || v === undefined) return "";
@@ -53,32 +65,28 @@ function DelayCell({ part }: { part: Part }) {
 
 type SortDir = "asc" | "desc";
 
-export function PartsTable({ parts, onPatch }: Props) {
+export function PartsTable({ parts, totalCount, onPatch }: Props) {
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const sorted = useMemo(() => {
     const col = COLUMNS.find((c) => c.key === sortKey);
     const numeric = col?.type === "number";
-    const arr = [...parts].sort((a, b) => {
+    return [...parts].sort((a, b) => {
       const av = a[sortKey];
       const bv = b[sortKey];
       if (av === null || av === undefined || av === "") return 1;
       if (bv === null || bv === undefined || bv === "") return -1;
-      const cmp = numeric
+      let cmp = numeric
         ? Number(av) - Number(bv)
         : String(av).localeCompare(String(bv));
+      if (cmp === 0) {
+        // stable within a PO
+        cmp = a.poh_num.localeCompare(b.poh_num) || a.poh_line - b.poh_line;
+        return cmp;
+      }
       return sortDir === "asc" ? cmp : -cmp;
     });
-    // stable secondary ordering inside a PO
-    if (sortKey === "poh_num") {
-      arr.sort((a, b) =>
-        a.poh_num === b.poh_num
-          ? a.poh_line - b.poh_line
-          : 0,
-      );
-    }
-    return arr;
   }, [parts, sortKey, sortDir]);
 
   const toggleSort = (key: keyof Part) => {
@@ -125,9 +133,25 @@ export function PartsTable({ parts, onPatch }: Props) {
               return (
                 <tr key={p.id}>
                   {COLUMNS.map((c) => {
+                    /* merged / special cells */
+                    if (c.key === "poh_num") {
+                      return (
+                        <td key="poh_num" className={samePO ? "muted-cell" : ""}>
+                          {p.poh_num}
+                          <span className="line-tag">·{p.poh_line}</span>
+                        </td>
+                      );
+                    }
+                    if (c.key === "line_value") {
+                      return (
+                        <td key="line_value" className="num">
+                          {fmtCurrency(p.line_value, p.currency)}
+                        </td>
+                      );
+                    }
                     if (c.key === "delay_days") {
                       return (
-                        <td key={String(c.key)} className="num">
+                        <td key="delay_days" className="num">
                           <DelayCell part={p} />
                         </td>
                       );
@@ -140,10 +164,17 @@ export function PartsTable({ parts, onPatch }: Props) {
                         </td>
                       );
                     }
-                    const dim = c.key === "poh_num" && samePO ? "muted-cell" : "";
+                    const text = displayValue(p, c);
+                    if (c.ellipsis) {
+                      return (
+                        <td key={String(c.key)} className="ellipsis" title={text}>
+                          {text}
+                        </td>
+                      );
+                    }
                     return (
-                      <td key={String(c.key)} className={`${numCls} ${dim}`.trim()}>
-                        {displayValue(p, c)}
+                      <td key={String(c.key)} className={numCls}>
+                        {text}
                       </td>
                     );
                   })}
@@ -153,7 +184,9 @@ export function PartsTable({ parts, onPatch }: Props) {
             {parts.length === 0 && (
               <tr>
                 <td colSpan={COLUMNS.length} className="empty">
-                  No replacement-parts POs yet. Tick the checkbox on a PO in Sage.
+                  {totalCount === 0
+                    ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
+                    : "Nothing matches the current filter."}
                 </td>
               </tr>
             )}
@@ -162,7 +195,7 @@ export function PartsTable({ parts, onPatch }: Props) {
       </div>
       <div className="table-foot">
         <span>
-          {parts.length} line{parts.length === 1 ? "" : "s"}
+          Showing {parts.length} of {totalCount} line{totalCount === 1 ? "" : "s"}
         </span>
         <span>Sage columns are read-only · yellow columns are editable</span>
       </div>
