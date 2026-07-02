@@ -1,0 +1,15 @@
+# secrets & local config
+.env
+*/.env
+
+# python
+venv/
+__pycache__/
+*.pyc
+
+# logs
+*.log
+
+# node / frontend (added when we scaffold it)
+node_modules/
+dist/

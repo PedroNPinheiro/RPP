@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+psycopg[binary]
+psycopg_pool
+pydantic-settings
+# Entra ID auth (added when SSO is wired up): pyjwt[crypto], httpx

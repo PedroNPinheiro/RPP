@@ -1,0 +1,89 @@
+-- Replacement Parts dashboard — Postgres schema
+-- One row per Sage purchase-order LINE, keyed on (poh_num, poh_line).
+--
+-- Three zones:
+--   [SAGE]     overwritten every sync from Sage X3 (read-only in the UI)
+--   [USER]     filled by the RP team in the dashboard — sync NEVER touches these
+--   [COMPUTED] derived in the parts_dashboard view (TODAY, DELAY, BALANCE, READY)
+
+CREATE TABLE IF NOT EXISTS parts (
+    id               BIGSERIAL PRIMARY KEY,
+
+    -- ---- natural key (from Sage) ----
+    poh_num          TEXT NOT NULL,          -- PORDERQ.POHNUM_0   (sheet: PO)
+    poh_line         INTEGER NOT NULL,       -- PORDERQ.POPLIN_0
+    UNIQUE (poh_num, poh_line),
+
+    -- ---- [SAGE] synced columns ----
+    po_date          DATE,                   -- PORDERQ.ORDDAT_0        (PO DATE)
+    item_code        TEXT,                   -- PORDERQ.ITMREF_0        (Code)
+    item_desc        TEXT,                   -- PORDERP.ITMDES1_0       (Item)
+    qty_ordered      NUMERIC,                -- PORDERQ.QTYPUU_0        (QTTY)
+    qty_received     NUMERIC,                -- PORDERQ.RCPQTYPUU_0     (-> Balance)
+    line_value       NUMERIC,                -- PORDERQ.LINAMT_0        (Value)
+    unit_price       NUMERIC,                -- PORDERP.NETPRI_0
+    currency         TEXT,                   -- PORDER.CUR_0
+    expected_receipt DATE,                   -- PORDERQ.EXTRCPDAT_0     (-> Delay)
+    line_site        TEXT,                   -- PORDERQ.LINSTOFCY_0
+    receipt_site     TEXT,                   -- PORDER.RCPFCY_0
+    supplier_code    TEXT,                   -- PORDER.BPSNUM_0
+    supplier_name    TEXT,                   -- PORDER.BPRNAM_0
+    order_ref        TEXT,                   -- PORDER.ORDREF_0     (candidate: Description) — CONFIRM
+    of_number        TEXT,                   -- phase 2 (OF / MWO)
+    pc_number        TEXT,                   -- phase 2 (PC / REQ)
+    sage_tracking    TEXT,                   -- PORDER.ZTRKNUM_0    (custom — maybe already the Tracking value)
+    sage_delivered   SMALLINT,               -- PORDER.ZPODEL_0     (custom delivered flag)
+    synced_at        TIMESTAMPTZ,            -- set every sync
+
+    -- ---- [USER] team-filled columns (sync never writes these) ----
+    entregue_war        DATE,                -- Entregue WAR
+    sent_to_production  DATE,                -- Sent to Production
+    production_closing  DATE,                -- Production Closing Date
+    status              TEXT,                -- STATUS (Cheio / Três quartos)
+    priority            TEXT,                -- Priority (P1-Critical...)
+    tank                TEXT,                -- TANK
+    estimated_date      DATE,                -- Estimated
+    required_ship       DATE,                -- Required Ship
+    eta_pc              DATE,                -- ETA PC
+    drawings_required   BOOLEAN,             -- Drawings Required?
+    drawings_desc       TEXT,                -- Drawings Desc
+    dest_type           TEXT,                -- DEST TYPE (CSS-Stock / CSR-Replacement)
+    real_ship_date      DATE,                -- Real Ship Date
+    shipping_method     TEXT,                -- Shipping Method
+    tracking            TEXT,                -- Tracking
+    notes               TEXT,
+    updated_by          TEXT,
+    updated_at          TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_parts_item     ON parts (item_code);
+CREATE INDEX IF NOT EXISTS idx_parts_supplier ON parts (supplier_code);
+CREATE INDEX IF NOT EXISTS idx_parts_dest     ON parts (dest_type);
+
+-- Sync run log — so we can see freshness / failures on the dashboard.
+CREATE TABLE IF NOT EXISTS sync_runs (
+    id           BIGSERIAL PRIMARY KEY,
+    started_at   TIMESTAMPTZ NOT NULL,
+    finished_at  TIMESTAMPTZ,
+    rows_upserted INTEGER,
+    ok           BOOLEAN,
+    error        TEXT
+);
+
+-- [COMPUTED] dashboard view — adds TODAY / BALANCE / DELAY / READY on top of the mirror.
+CREATE OR REPLACE VIEW parts_dashboard AS
+SELECT
+    p.*,
+    CURRENT_DATE                                       AS today,
+    (COALESCE(p.qty_ordered,0) - COALESCE(p.qty_received,0)) AS balance_qty,
+    CASE
+        WHEN p.qty_received >= p.qty_ordered THEN 0
+        WHEN p.expected_receipt IS NULL      THEN NULL
+        ELSE (CURRENT_DATE - p.expected_receipt)
+    END                                                AS delay_days,
+    CASE
+        WHEN p.qty_ordered IS NOT NULL
+         AND p.qty_received >= p.qty_ordered THEN 'Verde'   -- fully received
+        ELSE NULL
+    END                                                AS ready
+FROM parts p;
