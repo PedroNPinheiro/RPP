@@ -66,7 +66,7 @@ This is a real application, not a hand-written HTML file. Target stack:
 - [x] **Read half validated** (dryrun_sage.py): real flagged POs return correct item/qty/value; join grain clean (no POPSEQ fix needed)
 - [ ] **Description (H):** NOT `ORDREF_0` (came back blank) — likely a manual sheet field or another Sage field. TBD.
 - [ ] **DEST (O):** likely from line site `LINSTOFCY_0` (e.g. `00200`); sheet shows country (PT/UK/USA) → needs a site→country lookup.
-- [ ] Phase 2: OF (MWO, `WIPNUM_0`?) and PC (REQ, `VCRNUMORI_0`?) joins
+- [x] OF / PC: **decided — team-filled**, not synced from Sage (editable columns, in the PATCH whitelist)
 - [x] Hetzner VPS `CAS-CLOUD-05` (Ubuntu 24.04): Postgres up, schema loaded, roles `rpp_sync`/`rpp_app`
 - [x] WireGuard tunnel live: VM `10.77.0.2` ↔ Hetzner `10.77.0.1`; coexists with Fortinet (split tunnel)
 - [x] Postgres bound to tunnel IP only (`10.77.0.1`), `rpp_sync` allowed from `10.77.0.2/32`
