@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { aggregateByMonth, fmtEUR, MONTH_SHORT, years } from "../analytics";
 import { ColumnChart, type ChartDatum } from "../components/ColumnChart";
+import { IconBanknote, IconCheckCircle, IconClock, IconLayers } from "../components/Icons";
+import { Tile } from "../components/Tile";
 import { isCompleted } from "../logic";
 import type { Part } from "../types";
 
@@ -70,26 +72,34 @@ export function Analytics({ parts, loading }: Props) {
       </div>
 
       <div className="tiles">
-        <div className="tile">
-          <div className="label">Open value</div>
-          <div className="value">{fmtEUR(openValue)}</div>
-          <div className="context">POs not yet completed</div>
-        </div>
-        <div className="tile">
-          <div className="label">Completed value</div>
-          <div className="value">{fmtEUR(completedValue)}</div>
-          <div className="context">received or marked Completo</div>
-        </div>
-        <div className="tile">
-          <div className="label">Total value</div>
-          <div className="value">{fmtEUR(openValue + completedValue)}</div>
-          <div className="context">all replacement-parts lines</div>
-        </div>
-        <div className="tile">
-          <div className="label">PO lines</div>
-          <div className="value">{scoped.length}</div>
-          <div className="context">{year === "all" ? "all time" : `in ${year}`}</div>
-        </div>
+        <Tile
+          icon={<IconClock />}
+          tint="amber"
+          label="Open value"
+          value={fmtEUR(openValue)}
+          context="POs not yet completed"
+        />
+        <Tile
+          icon={<IconCheckCircle />}
+          tint="green"
+          label="Completed value"
+          value={fmtEUR(completedValue)}
+          context="received or marked Completo"
+        />
+        <Tile
+          icon={<IconBanknote />}
+          tint="blue"
+          label="Total value"
+          value={fmtEUR(openValue + completedValue)}
+          context="all replacement-parts lines"
+        />
+        <Tile
+          icon={<IconLayers />}
+          tint="neutral"
+          label="PO lines"
+          value={scoped.length}
+          context={year === "all" ? "all time" : `in ${year}`}
+        />
       </div>
 
       <div className="charts-grid">

@@ -41,17 +41,20 @@ function niceMax(v: number): number {
   return 10 * pow;
 }
 
-const M = { top: 10, right: 12, bottom: 34, left: 52 };
-const PLOT_H = 190;
-const BAR_W = 18; // ≤ 24px (mark spec)
+const M = { top: 12, right: 12, bottom: 36, left: 54 };
+const PLOT_H = 200;
+const BAR_W = 22; // ≤ 24px (mark spec)
 const BAR_GAP = 2; // surface gap between touching marks
-const BAND_GAP = 22;
+const TARGET_W = 620; // spread bands across the card when data is sparse
 
 export function ColumnChart({ title, series, data, format }: Props) {
   const [hover, setHover] = useState<number | null>(null);
 
   const groupW = series.length * BAR_W + (series.length - 1) * BAR_GAP;
-  const bandW = groupW + BAND_GAP;
+  const bandW = Math.max(
+    groupW + 16,
+    Math.min(130, Math.floor(TARGET_W / Math.max(data.length, 1))),
+  );
   const plotW = Math.max(data.length * bandW, 120);
   const width = M.left + plotW + M.right;
   const height = M.top + PLOT_H + M.bottom;
@@ -97,7 +100,7 @@ export function ColumnChart({ title, series, data, format }: Props) {
 
               {/* columns */}
               {data.map((d, i) => {
-                const x0 = M.left + i * bandW + BAND_GAP / 2;
+                const x0 = M.left + i * bandW + (bandW - groupW) / 2;
                 return (
                   <g key={d.label + i} opacity={hover === null || hover === i ? 1 : 0.45}>
                     {d.values.map((v, si) => {

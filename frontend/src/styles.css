@@ -1,7 +1,8 @@
 /* ---------- design tokens (reference palette: chrome & ink) ---------- */
 :root {
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
+  --page: #f2f2ef;
+  --surface: #fdfdfc;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 2px 8px rgba(11, 11, 11, 0.05);
   --ink-1: #0b0b0b;
   --ink-2: #52514e;
   --ink-3: #898781;
@@ -29,7 +30,8 @@
 /* dark mode is a selected option (persisted), applied via data-theme */
 :root[data-theme="dark"] {
   --page: #0d0d0d;
-  --surface: #1a1a19;
+  --surface: #1c1c1b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   --ink-1: #ffffff;
   --ink-2: #c3c2b7;
   --ink-3: #898781;
@@ -152,7 +154,7 @@ body {
   align-items: center;
   gap: 7px;
   padding: 4px 12px;
-  background: var(--surface);
+  background: var(--page);
   border: 1px solid var(--ring);
   border-radius: 999px;
   color: var(--ink-2);
@@ -173,7 +175,8 @@ body {
   border: 1px solid var(--ring);
   background: var(--surface);
   color: var(--ink-1);
-  border-radius: 7px;
+  border-radius: 9px;
+  box-shadow: var(--shadow);
   padding: 4px 13px;
   font: inherit;
   font-size: 13px;
@@ -195,33 +198,50 @@ body {
 /* ---------- stat tiles ---------- */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 215px));
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 250px));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 .tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: var(--surface);
   border: 1px solid var(--ring);
-  border-radius: 9px;
-  padding: 10px 14px 11px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 13px 16px;
 }
+.tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.t-blue { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.t-amber { background: color-mix(in srgb, #fab219 16%, transparent); color: var(--team-ink); }
+.t-red { background: var(--critical-wash); color: var(--critical); }
+.t-green { background: var(--good-wash); color: var(--good-text); }
+.t-neutral { background: color-mix(in srgb, var(--ink-3) 12%, transparent); color: var(--ink-2); }
+
 .tile .label {
   font-size: 11.5px;
   color: var(--ink-3);
-  margin-bottom: 2px;
 }
 .tile .value {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 21px;
+  font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--ink-1);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 .tile .value.crit { color: var(--critical); }
 .tile .context {
   font-size: 11px;
   color: var(--ink-3);
-  margin-top: 1px;
 }
 
 /* ---------- toolbar (filters in one row above the table) ---------- */
@@ -240,26 +260,27 @@ body {
 }
 .seg {
   display: inline-flex;
+  gap: 2px;
   background: var(--surface);
   border: 1px solid var(--ring);
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 3px;
 }
 .seg button {
   border: none;
+  border-radius: 7px;
   background: transparent;
   color: var(--ink-2);
   font: inherit;
   font-size: 12.5px;
-  padding: 5px 13px;
+  padding: 4px 13px;
   cursor: pointer;
-  border-right: 1px solid var(--grid);
 }
-.seg button:last-child { border-right: none; }
-.seg button:hover { color: var(--accent); }
+.seg button:hover { color: var(--ink-1); background: var(--hover-wash); }
 .seg button.on {
-  background: var(--hover-wash);
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
   font-weight: 600;
 }
 .seg .count {
@@ -269,13 +290,14 @@ body {
   margin-left: 4px;
   font-variant-numeric: tabular-nums;
 }
-.seg button.on .count { color: var(--accent); }
+.seg button.on .count { color: rgba(255, 255, 255, 0.75); }
 
 .search {
   border: 1px solid var(--ring);
   background: var(--surface);
   color: var(--ink-1);
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
   padding: 5px 12px;
   font: inherit;
   font-size: 12.5px;
@@ -303,7 +325,8 @@ body {
 .table-card {
   background: var(--surface);
   border: 1px solid var(--ring);
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 .table-scroll {
@@ -405,8 +428,9 @@ tbody tr:hover td.stick {
 
 /* ---------- PO group headers ---------- */
 .po-header td {
-  background: color-mix(in srgb, var(--ink-1) 2.5%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
   border-bottom: 1px solid var(--grid);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
   padding: 0;
   cursor: pointer;
 }
@@ -522,7 +546,8 @@ input[type="checkbox"] { accent-color: var(--accent); }
 .chart-card {
   background: var(--surface);
   border: 1px solid var(--ring);
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   padding: 14px 16px 8px;
   overflow: hidden;
 }

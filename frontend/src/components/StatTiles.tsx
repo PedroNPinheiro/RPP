@@ -1,5 +1,7 @@
 import { isCompleted, isDelayed } from "../logic";
 import type { Part } from "../types";
+import { IconAlert, IconBanknote, IconClock, IconLayers } from "./Icons";
+import { Tile } from "./Tile";
 
 interface Props {
   parts: Part[];
@@ -22,26 +24,35 @@ export function StatTiles({ parts }: Props) {
 
   return (
     <div className="tiles">
-      <div className="tile">
-        <div className="label">PO lines</div>
-        <div className="value">{parts.length}</div>
-        <div className="context">flagged Replacement Parts</div>
-      </div>
-      <div className="tile">
-        <div className="label">Open</div>
-        <div className="value">{openParts.length}</div>
-        <div className="context">not yet completed</div>
-      </div>
-      <div className="tile">
-        <div className="label">Delayed</div>
-        <div className={`value${delayed > 0 ? " crit" : ""}`}>{delayed}</div>
-        <div className="context">past expected date</div>
-      </div>
-      <div className="tile">
-        <div className="label">Total value</div>
-        <div className="value">{compactCurrency(totalValue, currency)}</div>
-        <div className="context">sum of open lines</div>
-      </div>
+      <Tile
+        icon={<IconLayers />}
+        tint="blue"
+        label="PO lines"
+        value={parts.length}
+        context="flagged Replacement Parts"
+      />
+      <Tile
+        icon={<IconClock />}
+        tint="amber"
+        label="Open"
+        value={openParts.length}
+        context="not yet completed"
+      />
+      <Tile
+        icon={<IconAlert />}
+        tint={delayed > 0 ? "red" : "neutral"}
+        label="Delayed"
+        value={delayed}
+        context="past expected date"
+        crit={delayed > 0}
+      />
+      <Tile
+        icon={<IconBanknote />}
+        tint="green"
+        label="Open value"
+        value={compactCurrency(totalValue, currency)}
+        context="sum of open lines"
+      />
     </div>
   );
 }
