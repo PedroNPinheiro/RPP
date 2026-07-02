@@ -205,12 +205,13 @@ body {
 .tile {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   background: var(--surface);
   border: 1px solid var(--ring);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  padding: 13px 16px;
+  padding: 14px 18px;
 }
 .tile-icon {
   display: inline-flex;
@@ -232,7 +233,7 @@ body {
   color: var(--ink-3);
 }
 .tile .value {
-  font-size: 21px;
+  font-size: 24px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--ink-1);
@@ -251,7 +252,7 @@ body {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .toolbar-right {
   display: flex;
@@ -485,7 +486,12 @@ tbody td.stick-3 { font-weight: 500; }
 }
 .chip.late { background: var(--critical-wash); color: var(--critical); }
 .chip.ready { background: var(--good-wash); color: var(--good-text); }
-.chip.neutral { color: var(--ink-3); font-weight: 400; }
+.chip.neutral {
+  color: var(--ink-2);
+  font-weight: 400;
+  border: 1px solid var(--ring);
+  background: var(--surface);
+}
 
 /* per-line state: quiet text, no pill */
 .dstat {
@@ -532,6 +538,10 @@ tbody td.stick-3 { font-weight: 500; }
   background-position: right 6px center;
 }
 .cell-select option { background: var(--surface); color: var(--ink-1); }
+.sel-crit { color: var(--critical); font-weight: 600; }
+.sel-warn { color: var(--team-ink); font-weight: 600; }
+.sel-good { color: var(--good-text); font-weight: 600; }
+.sel-info { color: var(--accent); font-weight: 600; }
 
 input[type="checkbox"] { accent-color: var(--accent); }
 

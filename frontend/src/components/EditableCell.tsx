@@ -25,16 +25,23 @@ export function EditableCell({ part, col, onPatch }: Props) {
   }
 
   if (col.type === "select") {
+    const v = (value ?? "") as string;
+    // meaningful color on high-signal values (paired with the text itself)
+    let tone = "";
+    if (col.key === "priority" && v.startsWith("P1")) tone = " sel-crit";
+    else if (col.key === "priority" && v.startsWith("P2")) tone = " sel-warn";
+    else if (col.key === "status" && v === "Completo") tone = " sel-good";
+    else if (col.key === "status" && v === "Em progresso") tone = " sel-info";
     return (
       <select
-        className="cell-input cell-select"
-        value={(value ?? "") as string}
+        className={`cell-input cell-select${tone}`}
+        value={v}
         onChange={(e) => {
           const next = e.target.value === "" ? null : e.target.value;
           onPatch(part.id, { [col.key]: next } as Partial<Part>);
         }}
       >
-        <option value="">—</option>
+        <option value=""> </option>
         {col.options?.map((o) => (
           <option key={o} value={o}>
             {o}
