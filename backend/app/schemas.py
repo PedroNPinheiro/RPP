@@ -63,7 +63,12 @@ class PartUpdate(BaseModel):
     """Only the team-editable columns. This model IS the security boundary:
     the PATCH endpoint can only touch fields declared here, so the API can
     never overwrite a Sage-synced column (and the sync can never clobber these).
+
+    of_number / pc_number are team-filled for now (the sync never writes
+    them); if we later automate them from Sage, remove them from this model.
     """
+    of_number: Optional[str] = None
+    pc_number: Optional[str] = None
     entregue_war: Optional[date] = None
     sent_to_production: Optional[date] = None
     production_closing: Optional[date] = None
