@@ -1,0 +1,23 @@
+[Unit]
+Description=RPP backend (FastAPI / uvicorn)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=rpp
+Group=rpp
+WorkingDirectory=/opt/rpp/backend
+ExecStart=/opt/rpp/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+# hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
