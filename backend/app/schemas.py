@@ -91,3 +91,11 @@ class SyncStatus(BaseModel):
     started_at: Optional[datetime] = None
     rows_upserted: Optional[int] = None
     ok: Optional[bool] = None
+
+
+class AuditEntry(BaseModel):
+    field: str
+    old_value: Optional[str] = None
+    new_value: Optional[str] = None
+    changed_by: Optional[str] = None
+    changed_at: Optional[datetime] = None

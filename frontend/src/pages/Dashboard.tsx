@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Part } from "../types";
 import { isCompleted, isDelayed } from "../logic";
+import { HistoryModal } from "../components/HistoryModal";
 import { PartsTable } from "../components/PartsTable";
 import { StatTiles } from "../components/StatTiles";
 
@@ -16,6 +17,7 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
   const [grouped, setGrouped] = useState(true);
+  const [historyPart, setHistoryPart] = useState<Part | null>(null);
 
   const visible = useMemo(() => {
     let rows = parts;
@@ -95,7 +97,17 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         </div>
       </div>
 
-      <PartsTable parts={visible} totalCount={parts.length} grouped={grouped} onPatch={onPatch} />
+      <PartsTable
+        parts={visible}
+        totalCount={parts.length}
+        grouped={grouped}
+        onPatch={onPatch}
+        onHistory={setHistoryPart}
+      />
+
+      {historyPart && (
+        <HistoryModal part={historyPart} onClose={() => setHistoryPart(null)} />
+      )}
     </>
   );
 }

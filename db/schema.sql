@@ -60,6 +60,21 @@ CREATE INDEX IF NOT EXISTS idx_parts_item     ON parts (item_code);
 CREATE INDEX IF NOT EXISTS idx_parts_supplier ON parts (supplier_code);
 CREATE INDEX IF NOT EXISTS idx_parts_dest     ON parts (dest_type);
 
+-- Audit trail — one row per changed field on a team edit (who/when/old/new).
+-- Written by the API inside the same transaction as the UPDATE.
+CREATE TABLE IF NOT EXISTS part_audit (
+    id         BIGSERIAL PRIMARY KEY,
+    part_id    BIGINT NOT NULL REFERENCES parts(id) ON DELETE CASCADE,
+    poh_num    TEXT NOT NULL,       -- denormalized so history reads standalone
+    poh_line   INTEGER NOT NULL,
+    field      TEXT NOT NULL,       -- column name from the PartUpdate whitelist
+    old_value  TEXT,
+    new_value  TEXT,
+    changed_by TEXT NOT NULL,
+    changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_audit_part ON part_audit (part_id, changed_at DESC);
+
 -- Sync run log — so we can see freshness / failures on the dashboard.
 CREATE TABLE IF NOT EXISTS sync_runs (
     id           BIGSERIAL PRIMARY KEY,

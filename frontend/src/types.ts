@@ -59,3 +59,11 @@ export interface SyncStatus {
   rows_upserted: number | null;
   ok: boolean | null;
 }
+
+export interface AuditEntry {
+  field: string;
+  old_value: string | null;
+  new_value: string | null;
+  changed_by: string | null;
+  changed_at: string | null;
+}

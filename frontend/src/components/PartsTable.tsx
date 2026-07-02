@@ -3,6 +3,7 @@ import { COLUMNS, type Col } from "../columns";
 import { isCompleted } from "../logic";
 import type { Part } from "../types";
 import { EditableCell } from "./EditableCell";
+import { IconClock } from "./Icons";
 
 /* frozen columns: PO, Code, Item stay visible during horizontal scroll */
 const STICKY: Partial<Record<string, string>> = {
@@ -85,6 +86,7 @@ function renderLine(
   cols: Col[],
   inGroup: boolean,
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>,
+  onHistory: (p: Part) => void,
 ) {
   return (
     <tr key={p.id}>
@@ -173,6 +175,15 @@ function renderLine(
           </td>
         );
       })}
+      <td className="actions-cell">
+        <button
+          className="row-action"
+          title="Change history"
+          onClick={() => onHistory(p)}
+        >
+          <IconClock size={14} />
+        </button>
+      </td>
       <td className="filler" aria-hidden />
     </tr>
   );
@@ -185,9 +196,10 @@ interface Props {
   totalCount: number;
   grouped: boolean;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
+  onHistory: (p: Part) => void;
 }
 
-export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
+export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: Props) {
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -268,6 +280,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                   )}
                 </th>
               ))}
+              <th className="actions-th" aria-hidden />
               <th className="filler" aria-hidden />
             </tr>
           </thead>
@@ -282,7 +295,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={cols.length + 1}>
+                          <td colSpan={cols.length + 2}>
                             <div className="po-header-content">
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
@@ -299,14 +312,14 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                           </td>
                         </tr>
                       }
-                      lines={isOpen ? lines.map((p) => renderLine(p, cols, true, onPatch)) : []}
+                      lines={isOpen ? lines.map((p) => renderLine(p, cols, true, onPatch, onHistory)) : []}
                     />
                   );
                 })
-              : sorted.map((p) => renderLine(p, cols, false, onPatch))}
+              : sorted.map((p) => renderLine(p, cols, false, onPatch, onHistory))}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={cols.length + 1} className="empty">
+                <td colSpan={cols.length + 2} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}
