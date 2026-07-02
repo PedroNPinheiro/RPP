@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { NavLink, Route, Routes } from "react-router-dom";
 import { getParts, getSyncStatus, patchPart } from "./api";
 import type { Part, SyncStatus } from "./types";
-import { PartsTable } from "./components/PartsTable";
-import { StatTiles } from "./components/StatTiles";
 import { SyncBanner } from "./components/SyncBanner";
+import { Analytics } from "./pages/Analytics";
+import { Dashboard } from "./pages/Dashboard";
 
-import { isCompleted, isDelayed } from "./logic";
-
-type View = "open" | "delayed" | "completed" | "all";
 type Theme = "light" | "dark";
 
 function initialTheme(): Theme {
@@ -21,10 +19,7 @@ export default function App() {
   const [sync, setSync] = useState<SyncStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<View>("open");
-  const [search, setSearch] = useState("");
   const [theme, setTheme] = useState<Theme>(initialTheme);
-  const [grouped, setGrouped] = useState(true);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -58,102 +53,47 @@ export default function App() {
     }
   }, []);
 
-  const visible = useMemo(() => {
-    let rows = parts;
-    if (view === "open") rows = rows.filter((p) => !isCompleted(p));
-    if (view === "delayed") rows = rows.filter(isDelayed);
-    if (view === "completed") rows = rows.filter(isCompleted);
-    const q = search.trim().toLowerCase();
-    if (q) {
-      rows = rows.filter((p) =>
-        [p.poh_num, p.item_code, p.item_desc, p.supplier_name, p.tracking, p.notes]
-          .some((f) => f && f.toLowerCase().includes(q)),
-      );
-    }
-    return rows;
-  }, [parts, view, search]);
-
-  const counts = useMemo(
-    () => ({
-      open: parts.filter((p) => !isCompleted(p)).length,
-      delayed: parts.filter(isDelayed).length,
-      completed: parts.filter(isCompleted).length,
-      all: parts.length,
-    }),
-    [parts],
-  );
-
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-title">
-          <h1>Replacement Parts</h1>
-          <div className="subtitle">Live from Sage X3 · syncs every 15 min</div>
-        </div>
-        <div className="header-actions">
-          <button
-            className="btn icon-btn"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-          >
-            {theme === "dark" ? "☀" : "☾"}
-          </button>
-          <SyncBanner sync={sync} onRefresh={load} />
-        </div>
-      </header>
-
-      {error && <div className="error">⚠ {error}</div>}
-
-      {loading ? (
-        <div className="loading">Loading…</div>
-      ) : (
-        <>
-          <StatTiles parts={parts} />
-
-          <div className="toolbar">
-            <div className="seg">
-              <button className={view === "open" ? "on" : ""} onClick={() => setView("open")}>
-                Open <span className="count">{counts.open}</span>
-              </button>
-              <button className={view === "delayed" ? "on" : ""} onClick={() => setView("delayed")}>
-                Delayed <span className="count">{counts.delayed}</span>
-              </button>
-              <button
-                className={view === "completed" ? "on" : ""}
-                onClick={() => setView("completed")}
-              >
-                Completed <span className="count">{counts.completed}</span>
-              </button>
-              <button className={view === "all" ? "on" : ""} onClick={() => setView("all")}>
-                All <span className="count">{counts.all}</span>
-              </button>
-            </div>
-            <div className="toolbar-right">
-              <button
-                className={`btn${grouped ? " btn-on" : ""}`}
-                onClick={() => setGrouped((g) => !g)}
-                title="Group lines under their purchase order"
-              >
-                Group by PO
-              </button>
-              <input
-                className="search"
-                type="search"
-                placeholder="Search PO, code, item, supplier…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+    <>
+      <nav className="appbar">
+        <div className="appbar-inner">
+          <div className="brand" title="Live from Sage X3 · syncs every 15 min">
+            <span className="brand-mark">RP</span>
+            <span className="brand-name">Replacement Parts</span>
           </div>
 
-          <PartsTable
-            parts={visible}
-            totalCount={parts.length}
-            grouped={grouped}
-            onPatch={handlePatch}
-          />
-        </>
-      )}
-    </div>
+          <div className="tabs">
+            <NavLink to="/" end className={({ isActive }) => `tab${isActive ? " on" : ""}`}>
+              Dashboard
+            </NavLink>
+            <NavLink
+              to="/analytics"
+              className={({ isActive }) => `tab${isActive ? " on" : ""}`}
+            >
+              Analytics
+            </NavLink>
+          </div>
+
+          <div className="header-actions">
+            <button
+              className="btn icon-btn"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            >
+              {theme === "dark" ? "☀" : "☾"}
+            </button>
+            <SyncBanner sync={sync} onRefresh={load} />
+          </div>
+        </div>
+      </nav>
+
+      <main className="app">
+        {error && <div className="error">⚠ {error}</div>}
+        <Routes>
+          <Route path="/" element={<Dashboard parts={parts} loading={loading} onPatch={handlePatch} />} />
+          <Route path="/analytics" element={<Analytics parts={parts} loading={loading} />} />
+        </Routes>
+      </main>
+    </>
   );
 }

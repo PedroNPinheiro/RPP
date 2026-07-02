@@ -48,9 +48,10 @@ export function EditableCell({ part, col, onPatch }: Props) {
     );
   }
 
+  const emptyDate = col.type === "date" && !value;
   return (
     <input
-      className="cell-input"
+      className={`cell-input${emptyDate ? " empty-date" : ""}`}
       type={col.type === "date" ? "date" : "text"}
       defaultValue={(value ?? "") as string}
       onBlur={(e) => {
