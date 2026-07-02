@@ -4,30 +4,16 @@ import { isCompleted } from "../logic";
 import type { Part } from "../types";
 import { EditableCell } from "./EditableCell";
 
-interface Props {
-  parts: Part[];
-  totalCount: number;
-  grouped: boolean;
-  onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
-}
+/* frozen columns: PO, Code, Item stay visible during horizontal scroll */
+const STICKY: Partial<Record<string, string>> = {
+  poh_num: "stick stick-1",
+  item_code: "stick stick-2",
+  item_desc: "stick stick-3",
+};
+const stickyCls = (key: string) => STICKY[key] ?? "";
 
-/* ---- column groups band (Sage / Computed / Team) ---- */
-interface Band {
-  label: string;
-  span: number;
-  cls: string;
-}
-function groupBands(): Band[] {
-  const bands: Band[] = [];
-  for (const c of COLUMNS) {
-    const label =
-      c.group === "sage" ? "Sage X3" : c.group === "computed" ? "Computed" : "Team input";
-    const last = bands[bands.length - 1];
-    if (last && last.label === label) last.span += 1;
-    else bands.push({ label, span: 1, cls: c.group === "team" ? "gb-team" : "" });
-  }
-  return bands;
-}
+/* when grouped, PO-level facts live in the group header, not on every line */
+const GROUP_HIDDEN = new Set<string>(["supplier_name", "po_date"]);
 
 /* ---- formatting ---- */
 function fmtNumber(v: unknown): string {
@@ -55,28 +41,18 @@ function displayValue(part: Part, col: Col): string {
   return String(v).trim();
 }
 
-/* Delay as a status chip — icon + label, color never alone */
+/* per-line state: quiet colored text, icon + label (never color alone) */
 function DelayCell({ part }: { part: Part }) {
   const d = part.delay_days;
   const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
-  if (received) return <span className="chip ready">✓ received</span>;
-  if (isCompleted(part)) return <span className="chip ready">✓ completed</span>;
+  if (received) return <span className="dstat ok">✓ received</span>;
+  if (isCompleted(part)) return <span className="dstat ok">✓ done</span>;
   if (d === null || d === undefined) return null;
-  if (d > 0) return <span className="chip late">▲ {d}d late</span>;
-  return <span className="chip neutral">on time</span>;
+  if (d > 0) return <span className="dstat late">▲ {d}d late</span>;
+  return <span className="dstat quiet">on time</span>;
 }
 
-type SortDir = "asc" | "desc";
-
-/* frozen columns: PO, Code, Item stay visible during horizontal scroll */
-const STICKY: Partial<Record<string, string>> = {
-  poh_num: "stick stick-1",
-  item_code: "stick stick-2",
-  item_desc: "stick stick-3",
-};
-const stickyCls = (key: string) => STICKY[key] ?? "";
-
-/* ---- PO group header: aggregate status chip ---- */
+/* PO-level state: one pill per group header */
 function GroupChip({ lines }: { lines: Part[] }) {
   if (lines.every(isCompleted)) return <span className="chip ready">✓ completed</span>;
   const worst = Math.max(
@@ -86,7 +62,6 @@ function GroupChip({ lines }: { lines: Part[] }) {
   return <span className="chip neutral">on time</span>;
 }
 
-/* header + line rows, keyed as one unit */
 function FragmentRows({ header, lines }: { header: ReactNode; lines: ReactNode[] }) {
   return (
     <>
@@ -99,12 +74,13 @@ function FragmentRows({ header, lines }: { header: ReactNode; lines: ReactNode[]
 /* one PO line row; inside a group the PO cell shows only the line number */
 function renderLine(
   p: Part,
+  cols: Col[],
   inGroup: boolean,
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>,
 ) {
   return (
     <tr key={p.id}>
-      {COLUMNS.map((c) => {
+      {cols.map((c) => {
         if (c.key === "poh_num") {
           return (
             <td key="poh_num" className={`${stickyCls("poh_num")} ${inGroup ? "line-cell" : ""}`.trim()}>
@@ -163,10 +139,24 @@ function renderLine(
   );
 }
 
+type SortDir = "asc" | "desc";
+
+interface Props {
+  parts: Part[];
+  totalCount: number;
+  grouped: boolean;
+  onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
+}
+
 export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  const cols = useMemo(
+    () => (grouped ? COLUMNS.filter((c) => !GROUP_HIDDEN.has(String(c.key))) : COLUMNS),
+    [grouped],
+  );
 
   const toggleGroup = (po: string) =>
     setCollapsed((prev) => {
@@ -184,11 +174,8 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
       const bv = b[sortKey];
       if (av === null || av === undefined || av === "") return 1;
       if (bv === null || bv === undefined || bv === "") return -1;
-      let cmp = numeric
-        ? Number(av) - Number(bv)
-        : String(av).localeCompare(String(bv));
+      let cmp = numeric ? Number(av) - Number(bv) : String(av).localeCompare(String(bv));
       if (cmp === 0) {
-        // stable within a PO
         cmp = a.poh_num.localeCompare(b.poh_num) || a.poh_line - b.poh_line;
         return cmp;
       }
@@ -212,33 +199,29 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
       if (g) g.push(p);
       else m.set(p.poh_num, [p]);
     }
-    // group order: by PO number, honoring direction when sorting by PO
     const keys = [...m.keys()].sort((a, b) => a.localeCompare(b));
     if (sortKey === "poh_num" && sortDir === "desc") keys.reverse();
     return keys.map((k) => ({ po: k, lines: m.get(k)! }));
   }, [sorted, sortKey, sortDir]);
-
-  const bands = groupBands();
 
   return (
     <div className="table-card">
       <div className="table-scroll">
         <table>
           <thead>
-            <tr className="group-row">
-              {bands.map((b, i) => (
-                <th key={i} colSpan={b.span} className={b.cls}>
-                  {b.label}
-                </th>
-              ))}
-            </tr>
             <tr className="head-row">
-              {COLUMNS.map((c) => (
+              {cols.map((c) => (
                 <th
                   key={String(c.key)}
-                  className={`${c.type === "number" ? "num" : ""} ${stickyCls(String(c.key))}`.trim()}
+                  className={[
+                    c.type === "number" ? "num" : "",
+                    c.editable ? "th-team" : "",
+                    stickyCls(String(c.key)),
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   onClick={() => toggleSort(c.key)}
-                  title="Sort"
+                  title={c.editable ? "Editable — click to sort" : "Click to sort"}
                 >
                   {c.label}
                   {sortKey === c.key && (
@@ -259,12 +242,14 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={COLUMNS.length}>
+                          <td colSpan={cols.length}>
                             <div className="po-header-content">
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
                               <span className="po-meta">{first.supplier_name}</span>
+                              <span className="po-sep">·</span>
                               <span className="po-meta">{first.po_date ?? ""}</span>
+                              <span className="po-sep">·</span>
                               <span className="po-meta">
                                 {lines.length} line{lines.length === 1 ? "" : "s"} ·{" "}
                                 {fmtCurrency(total, first.currency)}
@@ -274,14 +259,14 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                           </td>
                         </tr>
                       }
-                      lines={isOpen ? lines.map((p) => renderLine(p, true, onPatch)) : []}
+                      lines={isOpen ? lines.map((p) => renderLine(p, cols, true, onPatch)) : []}
                     />
                   );
                 })
-              : sorted.map((p) => renderLine(p, false, onPatch))}
+              : sorted.map((p) => renderLine(p, cols, false, onPatch))}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={COLUMNS.length} className="empty">
+                <td colSpan={cols.length} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}
@@ -295,7 +280,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
         <span>
           Showing {parts.length} of {totalCount} line{totalCount === 1 ? "" : "s"}
         </span>
-        <span>Sage columns are read-only · yellow columns are editable</span>
+        <span>Sage data is read-only · amber columns are yours to edit</span>
       </div>
     </div>
   );
