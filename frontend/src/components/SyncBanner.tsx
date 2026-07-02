@@ -16,14 +16,14 @@ interface Props {
 export function SyncBanner({ sync, onRefresh }: Props) {
   const failed = sync?.ok === false;
   return (
-    <div className={`sync-banner ${failed ? "sync-bad" : ""}`}>
-      <span className="sync-dot" />
-      <span>
-        Last sync: <strong>{ago(sync?.started_at)}</strong>
-        {sync && (
+    <div className="header-actions">
+      <span className={`sync-chip${failed ? " bad" : ""}`}>
+        <span className="dot" />
+        {failed ? (
+          <>⚠ last sync failed</>
+        ) : (
           <>
-            {" "}
-            · {sync.rows_upserted} rows{failed ? " · FAILED" : ""}
+            Synced <strong>{ago(sync?.started_at)}</strong>
           </>
         )}
       </span>

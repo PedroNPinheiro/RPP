@@ -75,8 +75,9 @@ This is a real application, not a hand-written HTML file. Target stack:
 - [x] Git repo on GitHub (private): `PedroNPinheiro/RPP`; Hetzner pulls via read-only deploy key
 - [x] **Backend live on Hetzner**: FastAPI returns real data — `/api/parts`, `/api/sync-status`, `/health` verified
 - [x] Backend runs as a **systemd service** (`rpp-backend`, non-root `rpp` user, auto-restart) at `/opt/rpp`; deploy = `git pull && systemctl restart rpp-backend`
-- [ ] Frontend: framework table UI (read-only Sage cols + editable team cols, sort/filter, sync banner)
-- [ ] Production pass: reverse proxy, HTTPS, Entra ID SSO, IP allowlist
+- [x] **Frontend live**: React dashboard served by Caddy at http://167.233.151.108 (port 80 IP-allowlisted) — real data, computed cols, sync banner, inline team-column editing
+- [ ] Frontend niceties: sort/filter, dropdowns for Status/Priority/Dest Type, group-by-PO
+- [ ] Production pass: domain → HTTPS (Caddy auto-TLS), Entra ID SSO, tighten IP allowlist
 - [ ] Data formatting: trim Sage blanks (`' '`), tidy NUMERIC display (`1.0000…`, `0E-13`) in the UI
 - [ ] Production: read-only Sage login, rotate credentials, switch schema to prod folder
 ```

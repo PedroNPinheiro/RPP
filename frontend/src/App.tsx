@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getParts, getSyncStatus, patchPart } from "./api";
 import type { Part, SyncStatus } from "./types";
 import { PartsTable } from "./components/PartsTable";
+import { StatTiles } from "./components/StatTiles";
 import { SyncBanner } from "./components/SyncBanner";
 
 export default function App() {
@@ -28,22 +29,22 @@ export default function App() {
     load();
   }, [load]);
 
-  const handlePatch = useCallback(
-    async (id: number, fields: Partial<Part>) => {
-      try {
-        const updated = await patchPart(id, fields);
-        setParts((prev) => prev.map((p) => (p.id === id ? updated : p)));
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      }
-    },
-    [],
-  );
+  const handlePatch = useCallback(async (id: number, fields: Partial<Part>) => {
+    try {
+      const updated = await patchPart(id, fields);
+      setParts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }, []);
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Replacement Parts</h1>
+        <div className="app-title">
+          <h1>Replacement Parts</h1>
+          <div className="subtitle">Live from Sage X3 · syncs every 15 min</div>
+        </div>
         <SyncBanner sync={sync} onRefresh={load} />
       </header>
 
@@ -52,7 +53,10 @@ export default function App() {
       {loading ? (
         <div className="loading">Loading…</div>
       ) : (
-        <PartsTable parts={parts} onPatch={handlePatch} />
+        <>
+          <StatTiles parts={parts} />
+          <PartsTable parts={parts} onPatch={handlePatch} />
+        </>
       )}
     </div>
   );
