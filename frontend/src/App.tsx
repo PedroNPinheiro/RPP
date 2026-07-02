@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { getParts, getSyncStatus, patchPart } from "./api";
 import type { Part, SyncStatus } from "./types";
+import { IconChart, IconGrid } from "./components/Icons";
 import { SyncBanner } from "./components/SyncBanner";
 import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
@@ -12,6 +13,24 @@ function initialTheme(): Theme {
   const saved = localStorage.getItem("rpp-theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+/* company logo card: drop the real logo at frontend/public/logo.png;
+   falls back to the RP mark if the file isn't there */
+function LogoCard() {
+  const [hasLogo, setHasLogo] = useState(true);
+  return (
+    <div className="logo-card">
+      {hasLogo ? (
+        <img src="/logo.png" alt="CASCO Pet" onError={() => setHasLogo(false)} />
+      ) : (
+        <div className="logo-fallback">
+          <span className="brand-mark">RP</span>
+          <span>Replacement Parts</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function App() {
@@ -54,46 +73,48 @@ export default function App() {
   }, []);
 
   return (
-    <>
-      <nav className="appbar">
-        <div className="appbar-inner">
-          <div className="brand" title="Live from Sage X3 · syncs every 15 min">
-            <span className="brand-mark">RP</span>
-            <span className="brand-name">Replacement Parts</span>
-          </div>
+    <div className="shell">
+      <aside className="sidebar">
+        <LogoCard />
+        <div className="nav-label">Navigation</div>
+        <NavLink to="/" end className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}>
+          <IconGrid />
+          <span>Dashboard</span>
+          <span className="nav-chev">›</span>
+        </NavLink>
+        <NavLink
+          to="/analytics"
+          className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}
+        >
+          <IconChart />
+          <span>Analytics</span>
+          <span className="nav-chev">›</span>
+        </NavLink>
+      </aside>
 
-          <div className="tabs">
-            <NavLink to="/" end className={({ isActive }) => `tab${isActive ? " on" : ""}`}>
-              Dashboard
-            </NavLink>
-            <NavLink
-              to="/analytics"
-              className={({ isActive }) => `tab${isActive ? " on" : ""}`}
-            >
-              Analytics
-            </NavLink>
-          </div>
+      <div className="main">
+        <header className="topbar">
+          <button
+            className="btn icon-btn"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+          <SyncBanner sync={sync} onRefresh={load} />
+        </header>
 
-          <div className="header-actions">
-            <button
-              className="btn icon-btn"
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-            >
-              {theme === "dark" ? "☀" : "☾"}
-            </button>
-            <SyncBanner sync={sync} onRefresh={load} />
-          </div>
-        </div>
-      </nav>
-
-      <main className="app">
-        {error && <div className="error">⚠ {error}</div>}
-        <Routes>
-          <Route path="/" element={<Dashboard parts={parts} loading={loading} onPatch={handlePatch} />} />
-          <Route path="/analytics" element={<Analytics parts={parts} loading={loading} />} />
-        </Routes>
-      </main>
-    </>
+        <main className="content">
+          {error && <div className="error">⚠ {error}</div>}
+          <Routes>
+            <Route
+              path="/"
+              element={<Dashboard parts={parts} loading={loading} onPatch={handlePatch} />}
+            />
+            <Route path="/analytics" element={<Analytics parts={parts} loading={loading} />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
   );
 }

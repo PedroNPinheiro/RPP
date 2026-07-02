@@ -47,6 +47,16 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
 
   return (
     <>
+      <div className="page-head">
+        <div>
+          <h2>Dashboard</h2>
+          <div className="page-sub">
+            {parts.length} line{parts.length === 1 ? "" : "s"} · live from Sage X3 · syncs
+            every 15 min
+          </div>
+        </div>
+      </div>
+
       <StatTiles parts={parts} />
 
       <div className="toolbar">
