@@ -24,6 +24,7 @@ export default function App() {
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [grouped, setGrouped] = useState(true);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -127,16 +128,30 @@ export default function App() {
                 All <span className="count">{counts.all}</span>
               </button>
             </div>
-            <input
-              className="search"
-              type="search"
-              placeholder="Search PO, code, item, supplier…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <div className="toolbar-right">
+              <button
+                className={`btn${grouped ? " btn-on" : ""}`}
+                onClick={() => setGrouped((g) => !g)}
+                title="Group lines under their purchase order"
+              >
+                Group by PO
+              </button>
+              <input
+                className="search"
+                type="search"
+                placeholder="Search PO, code, item, supplier…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
 
-          <PartsTable parts={visible} totalCount={parts.length} onPatch={handlePatch} />
+          <PartsTable
+            parts={visible}
+            totalCount={parts.length}
+            grouped={grouped}
+            onPatch={handlePatch}
+          />
         </>
       )}
     </div>

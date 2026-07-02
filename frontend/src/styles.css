@@ -194,6 +194,18 @@ body {
 }
 .seg button.on .count { color: var(--accent); }
 
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn-on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--hover-wash);
+  font-weight: 600;
+}
+
 .search {
   border: 1px solid var(--ring);
   background: var(--surface);
@@ -339,6 +351,42 @@ tbody tr:hover td.stick {
   margin-left: 4px;
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------- PO group headers ---------- */
+.po-header td {
+  background: color-mix(in srgb, var(--ink-1) 3.5%, var(--surface));
+  border-top: 1px solid var(--baseline);
+  border-bottom: 1px solid var(--grid);
+  padding: 0;
+  cursor: pointer;
+}
+.po-header:hover td {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+/* content stays visible while the row scrolls horizontally */
+.po-header-content {
+  position: sticky;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  max-width: min(96vw, 1000px);
+}
+.po-header-content strong {
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+.po-chevron {
+  color: var(--ink-3);
+  font-size: 11px;
+  width: 12px;
+  display: inline-block;
+}
+.po-meta { color: var(--ink-2); }
+.line-cell { text-align: right; }
+td.line-cell .line-tag { margin-left: 0; }
 
 /* status chips — icon + label, color never alone */
 .chip {
