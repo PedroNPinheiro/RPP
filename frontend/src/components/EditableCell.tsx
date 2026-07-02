@@ -1,6 +1,14 @@
 import type { Col } from "../columns";
 import type { Part } from "../types";
 
+/* status → dot color (color always beside the status text, never alone) */
+const STATUS_DOT: Record<string, string> = {
+  "Por começar": "st-todo",
+  "Em progresso": "st-prog",
+  "Pendente": "st-pend",
+  "Completo": "st-done",
+};
+
 interface Props {
   part: Part;
   col: Col;
@@ -32,7 +40,8 @@ export function EditableCell({ part, col, onPatch }: Props) {
     else if (col.key === "priority" && v.startsWith("P2")) tone = " sel-warn";
     else if (col.key === "status" && v === "Completo") tone = " sel-good";
     else if (col.key === "status" && v === "Em progresso") tone = " sel-info";
-    return (
+    const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
+    const select = (
       <select
         className={`cell-input cell-select${tone}`}
         value={v}
@@ -52,6 +61,13 @@ export function EditableCell({ part, col, onPatch }: Props) {
           <option value={String(value)}>{String(value)}</option>
         )}
       </select>
+    );
+    if (!dot) return select;
+    return (
+      <span className="sel-wrap">
+        <span className={`status-dot ${dot}`} />
+        {select}
+      </span>
     );
   }
 

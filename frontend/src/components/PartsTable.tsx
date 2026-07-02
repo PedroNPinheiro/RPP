@@ -34,10 +34,18 @@ function fmtCurrency(v: unknown, currency: string | null): string {
   }).format(n);
 }
 
+function fmtDate(v: unknown): string {
+  if (!v) return "";
+  const d = new Date(String(v));
+  if (Number.isNaN(d.getTime())) return String(v);
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 function displayValue(part: Part, col: Col): string {
   const v = part[col.key];
   if (v === null || v === undefined) return "";
   if (col.type === "number") return fmtNumber(v);
+  if (col.type === "date") return fmtDate(v);
   return String(v).trim();
 }
 
@@ -102,6 +110,22 @@ function renderLine(
             </td>
           );
         }
+        if (c.key === "qty_received") {
+          const zero = !Number(p.qty_received);
+          return (
+            <td key="qty_received" className={`num${zero ? " num-muted" : ""}`}>
+              {fmtNumber(p.qty_received)}
+            </td>
+          );
+        }
+        if (c.key === "balance_qty") {
+          const open = Number(p.balance_qty) > 0;
+          return (
+            <td key="balance_qty" className={`num ${open ? "num-strong" : "num-muted"}`}>
+              {fmtNumber(p.balance_qty)}
+            </td>
+          );
+        }
         if (c.key === "delay_days") {
           return (
             <td key="delay_days" className="num">
@@ -118,6 +142,20 @@ function renderLine(
           );
         }
         const text = displayValue(p, c);
+        if (c.key === "item_code") {
+          return (
+            <td key="item_code" className={`code-cell ${stickyCls("item_code")}`.trim()}>
+              {text}
+            </td>
+          );
+        }
+        if (c.type === "date" && !c.editable) {
+          return (
+            <td key={String(c.key)} className="date-cell">
+              {text}
+            </td>
+          );
+        }
         if (c.ellipsis) {
           return (
             <td
@@ -250,7 +288,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch }: Props) {
                               <strong>{po}</strong>
                               <span className="po-meta">{first.supplier_name}</span>
                               <span className="po-sep">·</span>
-                              <span className="po-meta">{first.po_date ?? ""}</span>
+                              <span className="po-meta">{fmtDate(first.po_date)}</span>
                               <span className="po-sep">·</span>
                               <span className="po-meta">
                                 {lines.length} line{lines.length === 1 ? "" : "s"} ·{" "}

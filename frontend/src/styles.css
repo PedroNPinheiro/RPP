@@ -461,12 +461,52 @@ td.ellipsis {
 }
 .line-tag {
   color: var(--ink-3);
-  font-size: 11px;
-  margin-left: 4px;
+  font-size: 10px;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-3) 12%, transparent);
   font-variant-numeric: tabular-nums;
 }
 .line-cell { text-align: right; }
 td.line-cell .line-tag { margin-left: 0; }
+
+/* identifiers read as codes, not prose */
+td.code-cell {
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+}
+td.stick-1 { font-variant-numeric: tabular-nums; }
+
+/* number emphasis: the actionable figure is loud, zeros are quiet */
+td.num-strong { font-weight: 650; }
+td.num-muted { color: var(--ink-3); }
+
+/* dates are secondary context */
+td.date-cell {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* status dot beside the select text */
+.sel-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.st-todo { background: var(--ink-3); }
+.st-prog { background: var(--accent); }
+.st-pend { background: #fab219; }
+.st-done { background: var(--good); }
 
 /* ---------- frozen columns (PO / Code / Item) ---------- */
 :root {
