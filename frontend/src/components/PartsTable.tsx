@@ -67,6 +67,14 @@ function DelayCell({ part }: { part: Part }) {
 
 type SortDir = "asc" | "desc";
 
+/* frozen columns: PO, Code, Item stay visible during horizontal scroll */
+const STICKY: Partial<Record<string, string>> = {
+  poh_num: "stick stick-1",
+  item_code: "stick stick-2",
+  item_desc: "stick stick-3",
+};
+const stickyCls = (key: string) => STICKY[key] ?? "";
+
 export function PartsTable({ parts, totalCount, onPatch }: Props) {
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -117,7 +125,7 @@ export function PartsTable({ parts, totalCount, onPatch }: Props) {
               {COLUMNS.map((c) => (
                 <th
                   key={String(c.key)}
-                  className={c.type === "number" ? "num" : ""}
+                  className={`${c.type === "number" ? "num" : ""} ${stickyCls(String(c.key))}`.trim()}
                   onClick={() => toggleSort(c.key)}
                   title="Sort"
                 >
@@ -138,7 +146,10 @@ export function PartsTable({ parts, totalCount, onPatch }: Props) {
                     /* merged / special cells */
                     if (c.key === "poh_num") {
                       return (
-                        <td key="poh_num" className={samePO ? "muted-cell" : ""}>
+                        <td
+                          key="poh_num"
+                          className={`${stickyCls("poh_num")} ${samePO ? "muted-cell" : ""}`.trim()}
+                        >
                           {p.poh_num}
                           <span className="line-tag">·{p.poh_line}</span>
                         </td>
@@ -169,13 +180,17 @@ export function PartsTable({ parts, totalCount, onPatch }: Props) {
                     const text = displayValue(p, c);
                     if (c.ellipsis) {
                       return (
-                        <td key={String(c.key)} className="ellipsis" title={text}>
+                        <td
+                          key={String(c.key)}
+                          className={`ellipsis ${stickyCls(String(c.key))}`.trim()}
+                          title={text}
+                        >
                           {text}
                         </td>
                       );
                     }
                     return (
-                      <td key={String(c.key)} className={numCls}>
+                      <td key={String(c.key)} className={`${numCls} ${stickyCls(String(c.key))}`.trim()}>
                         {text}
                       </td>
                     );

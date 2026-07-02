@@ -302,6 +302,37 @@ td.ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ---------- frozen columns (PO / Code / Item) ---------- */
+:root {
+  --stick-w1: 185px; /* PO */
+  --stick-w2: 95px;  /* Code */
+  --stick-w3: 240px; /* Item */
+}
+th.stick,
+td.stick {
+  position: sticky;
+  background: var(--surface);
+}
+td.stick { z-index: 1; }
+thead .head-row th.stick { z-index: 4; }
+.stick-1 { left: 0; width: var(--stick-w1); min-width: var(--stick-w1); }
+.stick-2 { left: var(--stick-w1); width: var(--stick-w2); min-width: var(--stick-w2); }
+.stick-3 {
+  left: calc(var(--stick-w1) + var(--stick-w2));
+  width: var(--stick-w3);
+  min-width: var(--stick-w3);
+  max-width: var(--stick-w3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* divider marking the frozen edge */
+  box-shadow: inset -1px 0 0 var(--baseline);
+}
+/* sticky cells need a solid hover (transparent wash would show scrolled
+   content underneath) */
+tbody tr:hover td.stick {
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
 .line-tag {
   color: var(--ink-3);
   font-size: 11px;
