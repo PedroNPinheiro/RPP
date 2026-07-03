@@ -162,7 +162,6 @@ function renderLine(
         );
       })}
       <td className="open-cell">›</td>
-      <td className="filler" aria-hidden />
     </tr>
   );
 }
@@ -249,6 +248,7 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                   className={[
                     c.type === "number" ? "num" : "",
                     c.editable ? "th-team" : "",
+                    c.ellipsis ? "th-flex" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -262,7 +262,6 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                 </th>
               ))}
               <th className="open-th" aria-hidden />
-              <th className="filler" aria-hidden />
             </tr>
           </thead>
           <tbody>
@@ -276,7 +275,7 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={cols.length + 2}>
+                          <td colSpan={cols.length + 1}>
                             <div className="po-header-content">
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
@@ -308,7 +307,7 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                 )}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={cols.length + 2} className="empty">
+                <td colSpan={cols.length + 1} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}

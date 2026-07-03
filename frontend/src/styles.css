@@ -458,8 +458,9 @@ thead .head-row th:hover { color: var(--accent); }
 thead .head-row th.th-team { color: var(--team-ink); }
 thead .head-row th .sort-arrow { color: var(--accent); margin-left: 3px; }
 thead .head-row th.num { text-align: right; }
-thead .head-row th:not(.filler) { width: 1%; }
-th.filler, td.filler { padding: 0; }
+/* every column hugs its content except Item, which absorbs the leftover
+   width — rows fill the card edge-to-edge with no dead zone */
+thead .head-row th:not(.th-flex) { width: 1%; }
 
 tbody td {
   padding: 11px 12px;
@@ -481,7 +482,7 @@ td.empty {
   padding: 36px;
 }
 td.ellipsis {
-  max-width: 280px;
+  max-width: 0; /* flexes with the column; ellipsizes only when it must */
   overflow: hidden;
   text-overflow: ellipsis;
 }
