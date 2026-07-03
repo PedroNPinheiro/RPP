@@ -178,8 +178,8 @@ body {
 
 
 .content {
-  padding: 28px 40px 48px;
-  max-width: 1520px;
+  padding: 28px 36px 48px;
+  max-width: 1300px;
   width: 100%;
   margin: 0 auto;
 }
@@ -542,13 +542,13 @@ td.date-cell {
   position: sticky;
   top: 41px;
   z-index: 1;
-  background: color-mix(in srgb, var(--ink-1) 2.5%, var(--surface));
+  background: var(--page);
   border-bottom: 1px solid var(--grid);
   padding: 0;
   cursor: pointer;
 }
 .po-header:hover td {
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 8%, var(--page));
 }
 .po-header-content {
   position: sticky;
