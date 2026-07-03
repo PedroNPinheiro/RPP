@@ -115,14 +115,21 @@ interface Props {
 export function PartDetail({ part, onClose, onPatch }: Props) {
   const [entries, setEntries] = useState<AuditEntry[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const loadAudit = useCallback(() => {
     getAudit(part.id).then(setEntries).catch(() => setEntries([]));
   }, [part.id]);
 
+  // history is collapsed by default; load lazily when opened
   useEffect(() => {
-    loadAudit();
-  }, [loadAudit, part.updated_at]);
+    if (showHistory) loadAudit();
+  }, [showHistory, loadAudit, part.updated_at]);
+
+  useEffect(() => {
+    setShowHistory(false);
+    setEntries(null);
+  }, [part.id]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -220,9 +227,15 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
             </section>
           ))}
 
-          {/* History */}
+          {/* History — collapsed by default */}
           <section className="f-section">
-            <h4>Change history</h4>
+            <button className="f-section-toggle" onClick={() => setShowHistory((v) => !v)}>
+              <span className="po-chevron">{showHistory ? "▾" : "▸"}</span>
+              Change history
+              {entries && showHistory ? ` (${entries.length})` : ""}
+            </button>
+            {showHistory && (
+              <>
             {!entries && <div className="loading">Loading…</div>}
             {entries && entries.length === 0 && (
               <div className="audit-empty">No changes recorded yet.</div>
@@ -249,6 +262,8 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
                 </div>
               </div>
             ))}
+              </>
+            )}
           </section>
         </div>
       </aside>
