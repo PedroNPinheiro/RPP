@@ -1,5 +1,11 @@
-import { useMemo, useState } from "react";
-import type { Part } from "../types";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { getRecentAudit } from "../api";
+import { aggregateByMonth, fmtEUR, MONTH_SHORT } from "../analytics";
+import { FIELD_LABELS } from "../columns";
+import { ColumnChart, type ChartDatum } from "../components/ColumnChart";
+import { fmtDateTime } from "../format";
+import type { Part, RecentAuditEntry } from "../types";
 import { isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
 import { PartDetail } from "../components/PartDetail";
@@ -20,6 +26,20 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
   const [search, setSearch] = useState("");
   const [grouped, setGrouped] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [recent, setRecent] = useState<RecentAuditEntry[] | null>(null);
+
+  useEffect(() => {
+    getRecentAudit(6).then(setRecent).catch(() => setRecent([]));
+  }, [parts]);
+
+  const valueData: ChartDatum[] = useMemo(() => {
+    const aggs = aggregateByMonth(parts);
+    return aggs.map((a, i) => ({
+      label: MONTH_SHORT[a.month - 1],
+      sub: a.month === 1 || i === 0 ? String(a.year) : undefined,
+      values: [a.openValue, a.completedValue],
+    }));
+  }, [parts]);
 
   // derive from the live list so drawer edits show immediately
   const selected = useMemo(
@@ -115,6 +135,48 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         onPatch={onPatch}
         onOpen={(p) => setSelectedId(p.id)}
       />
+
+      <div className="dash-bottom">
+        <ColumnChart
+          title="Value by month"
+          series={[
+            { name: "Open", colorVar: "--series-1" },
+            { name: "Completed", colorVar: "--series-2" },
+          ]}
+          data={valueData}
+          format={(n) => fmtEUR(n, true)}
+        />
+
+        <div className="chart-card">
+          <div className="chart-head">
+            <h3>Recent activity</h3>
+            <Link className="panel-link" to="/activity">
+              View all ›
+            </Link>
+          </div>
+          {!recent && <div className="loading">Loading…</div>}
+          {recent && recent.length === 0 && (
+            <div className="audit-empty">No changes yet.</div>
+          )}
+          {recent?.map((e, i) => (
+            <div key={i} className="audit-row">
+              <div className="audit-meta">
+                <span className="audit-when">{fmtDateTime(e.changed_at)}</span>
+                <span className="audit-who">{e.changed_by}</span>
+                <span className="activity-ref">
+                  {e.poh_num} · {e.item_desc ?? `line ${e.poh_line}`}
+                </span>
+              </div>
+              <div className="audit-change">
+                <span className="audit-field">{FIELD_LABELS[e.field] ?? e.field}</span>
+                <span className="audit-old">{e.old_value ?? "—"}</span>
+                <span className="audit-arrow">→</span>
+                <span className="audit-new">{e.new_value ?? "—"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {selected && (
         <PartDetail
