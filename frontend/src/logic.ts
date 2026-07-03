@@ -1,10 +1,11 @@
 import type { Part } from "./types";
 
-export const STATUS_COMPLETE = "Completo";
+/** Statuses that mean "done" (legacy Completo kept for old rows). */
+export const COMPLETE_STATUSES = new Set(["Enviado/Já Saiu", "Completo"]);
 
-/** Completed = team marked it Completo, or Sage shows it fully received. */
+/** Completed = team marked it shipped/done, or Sage shows it fully received. */
 export function isCompleted(p: Part): boolean {
-  if (p.status === STATUS_COMPLETE) return true;
+  if (p.status && COMPLETE_STATUSES.has(p.status)) return true;
   return p.qty_ordered !== null && Number(p.balance_qty) <= 0;
 }
 

@@ -15,7 +15,13 @@ export interface Col {
 
 export const PRIORITY_OPTIONS = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];
 export const DEST_TYPE_OPTIONS = ["CSS - Stock", "CSR - Replacement"];
-export const STATUS_OPTIONS = ["Por começar", "Em progresso", "Pendente", "Completo"];
+export const STATUS_OPTIONS = [
+  "Por Iniciar",
+  "Em Andamento",
+  "Pronto para Sair",
+  "Enviado/Já Saiu",
+  "Problema/Falta de Informação",
+];
 
 // Line and Currency are merged into the PO and Value cells (rendered in
 // PartsTable), so they don't occupy their own columns.

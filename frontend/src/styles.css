@@ -23,7 +23,7 @@
 
   --good-wash: rgba(12, 163, 12, 0.09);
   --critical-wash: rgba(208, 59, 59, 0.08);
-  --team-wash: rgba(250, 178, 25, 0.05);
+  --team-wash: rgba(250, 178, 25, 0.035);
   --team-ink: #9a6f00;
   --hover-wash: rgba(47, 111, 235, 0.045);
 
@@ -434,6 +434,8 @@ thead .head-row th:hover { color: var(--accent); }
 thead .head-row th.th-team { color: var(--team-ink); }
 thead .head-row th .sort-arrow { color: var(--accent); margin-left: 3px; }
 thead .head-row th.num { text-align: right; }
+thead .head-row th:not(.filler) { width: 1%; }
+th.filler, td.filler { padding: 0; }
 
 tbody td {
   padding: 8px 12px;
@@ -507,6 +509,7 @@ td.date-cell {
 .st-prog { background: var(--accent); }
 .st-pend { background: #fab219; }
 .st-done { background: var(--good); }
+.st-crit { background: var(--critical); }
 
 
 /* ---------- PO group headers (stick below the column header) ---------- */
@@ -608,11 +611,19 @@ td.date-cell {
 
 /* selects read as text until hovered */
 .cell-select {
-  min-width: 105px;
+  min-width: 130px;
+  max-width: 200px;
   appearance: none;
   cursor: pointer;
-  padding-right: 18px;
+  padding: 2px 18px 2px 10px;
+  border: 1px solid var(--ring);
+  border-radius: 999px;
+  background-color: var(--surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+.cell-select:hover { border-color: var(--baseline); }
 .cell-select:hover,
 .cell-select:focus {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238a94a6'/%3E%3C/svg%3E");
