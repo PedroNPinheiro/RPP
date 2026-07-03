@@ -1072,3 +1072,55 @@ tr.line-row:hover .pill-select.sel-empty {
 .pill-select.sel-good { color: var(--good-text); font-weight: 600; }
 .pill-select.sel-info { color: var(--accent); font-weight: 600; }
 .pill-select .pill-select-input option { color: var(--ink-1); background: var(--surface); }
+
+/* ---------- attachments ---------- */
+.att-count {
+  color: var(--ink-3);
+  font-size: 11px;
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.att-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.att-head h4 { margin: 0; }
+.att-add { height: 28px; padding: 0 12px; font-size: 12px; }
+.att-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--grid);
+}
+.att-row:last-child { border-bottom: none; }
+.att-name {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+}
+.att-name:hover { text-decoration: underline; }
+.att-meta {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.att-del {
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.att-del:hover { color: var(--critical); background: var(--critical-wash); }

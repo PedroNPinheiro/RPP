@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { getAudit } from "../api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  attachmentUrl,
+  deleteAttachment,
+  getAttachments,
+  getAudit,
+  uploadAttachment,
+} from "../api";
 import { colByKey, DETAIL_GROUPS, FIELD_LABELS, type Col } from "../columns";
 import { fmtDate, fmtDateTime } from "../format";
 import { isCompleted } from "../logic";
-import type { AuditEntry, Part } from "../types";
+import type { Attachment, AuditEntry, Part } from "../types";
 
 /* ---- one labeled form field ---- */
 function Field({
@@ -116,6 +122,47 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
   const [entries, setEntries] = useState<AuditEntry[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [files, setFiles] = useState<Attachment[] | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const loadFiles = useCallback(() => {
+    getAttachments(part.id).then(setFiles).catch(() => setFiles([]));
+  }, [part.id]);
+
+  useEffect(() => {
+    setFiles(null);
+    setFileError(null);
+    loadFiles();
+  }, [loadFiles]);
+
+  const onPickFiles = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    setUploading(true);
+    setFileError(null);
+    try {
+      for (const f of Array.from(list)) {
+        await uploadAttachment(part.id, f);
+      }
+      loadFiles();
+    } catch (e) {
+      setFileError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setUploading(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  };
+
+  const removeFile = async (a: Attachment) => {
+    if (!window.confirm(`Delete "${a.filename}"?`)) return;
+    try {
+      await deleteAttachment(a.id);
+      loadFiles();
+    } catch (e) {
+      setFileError(e instanceof Error ? e.message : String(e));
+    }
+  };
 
   const loadAudit = useCallback(() => {
     getAudit(part.id).then(setEntries).catch(() => setEntries([]));
@@ -226,6 +273,57 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
               </div>
             </section>
           ))}
+
+          {/* Attachments */}
+          <section className="f-section">
+            <div className="att-head">
+              <h4>Attachments{files ? ` (${files.length})` : ""}</h4>
+              <button
+                className="btn att-add"
+                disabled={uploading}
+                onClick={() => fileInput.current?.click()}
+              >
+                {uploading ? "Uploading…" : "+ Add file"}
+              </button>
+              <input
+                ref={fileInput}
+                type="file"
+                multiple
+                hidden
+                onChange={(e) => onPickFiles(e.target.files)}
+              />
+            </div>
+            {fileError && <div className="error">⚠ {fileError}</div>}
+            {files && files.length === 0 && (
+              <div className="audit-empty">No files yet. Max 25 MB per file.</div>
+            )}
+            {files?.map((a) => (
+              <div key={a.id} className="att-row">
+                <a
+                  className="att-name"
+                  href={attachmentUrl(a.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={a.filename}
+                >
+                  ⎘ {a.filename}
+                </a>
+                <span className="att-meta">
+                  {(a.size_bytes / 1024 < 1000
+                    ? `${Math.max(1, Math.round(a.size_bytes / 1024))} KB`
+                    : `${(a.size_bytes / 1048576).toFixed(1)} MB`)}{" "}
+                  · {a.uploaded_by}
+                </span>
+                <button
+                  className="att-del"
+                  title="Delete attachment"
+                  onClick={() => removeFile(a)}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </section>
 
           {/* History — collapsed by default */}
           <section className="f-section">

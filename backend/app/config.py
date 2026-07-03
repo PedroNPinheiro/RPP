@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # Postgres — the app connects locally as the least-privilege rpp_app role.
     database_url: str = "host=localhost dbname=rpp user=rpp_app password=CHANGE_ME"
 
+    # Where uploaded attachment files are stored (outside the repo).
+    upload_dir: str = "/var/lib/rpp/uploads"
+
     # Comma-separated allowed origins for the browser frontend.
     cors_origins: str = "*"
 

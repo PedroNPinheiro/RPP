@@ -52,6 +52,9 @@ class Part(BaseModel):
     updated_by: Optional[str] = None
     updated_at: Optional[datetime] = None
 
+    # populated by the list endpoint
+    attachment_count: Optional[int] = None
+
     # --- Computed (from the view) ---
     today: Optional[date] = None
     balance_qty: Optional[Decimal] = None
@@ -99,6 +102,15 @@ class AuditEntry(BaseModel):
     new_value: Optional[str] = None
     changed_by: Optional[str] = None
     changed_at: Optional[datetime] = None
+
+
+class Attachment(BaseModel):
+    id: int
+    filename: str
+    content_type: Optional[str] = None
+    size_bytes: int
+    uploaded_by: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
 
 
 class RecentAuditEntry(AuditEntry):

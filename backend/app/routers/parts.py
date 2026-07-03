@@ -13,7 +13,9 @@ def list_parts(user: dict = Depends(get_current_user)):
     with pool.connection() as conn:
         conn.row_factory = dict_row
         return conn.execute(
-            "SELECT * FROM parts_dashboard ORDER BY poh_num, poh_line"
+            "SELECT p.*, (SELECT count(*) FROM part_attachments a "
+            "WHERE a.part_id = p.id) AS attachment_count "
+            "FROM parts_dashboard p ORDER BY p.poh_num, p.poh_line"
         ).fetchall()
 
 

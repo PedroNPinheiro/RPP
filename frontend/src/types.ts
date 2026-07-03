@@ -47,6 +47,8 @@ export interface Part {
   updated_by: string | null;
   updated_at: string | null;
 
+  attachment_count?: number | null;
+
   // Computed (view)
   today: string | null;
   balance_qty: string | null;
@@ -66,6 +68,15 @@ export interface AuditEntry {
   new_value: string | null;
   changed_by: string | null;
   changed_at: string | null;
+}
+
+export interface Attachment {
+  id: number;
+  filename: string;
+  content_type: string | null;
+  size_bytes: number;
+  uploaded_by: string | null;
+  uploaded_at: string | null;
 }
 
 export interface RecentAuditEntry extends AuditEntry {

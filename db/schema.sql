@@ -75,6 +75,22 @@ CREATE TABLE IF NOT EXISTS part_audit (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_part ON part_audit (part_id, changed_at DESC);
 
+-- File attachments on PO lines. Files live on disk (UPLOAD_DIR) under a
+-- generated stored_name; this table holds the metadata.
+CREATE TABLE IF NOT EXISTS part_attachments (
+    id           BIGSERIAL PRIMARY KEY,
+    part_id      BIGINT NOT NULL REFERENCES parts(id) ON DELETE CASCADE,
+    poh_num      TEXT NOT NULL,
+    poh_line     INTEGER NOT NULL,
+    filename     TEXT NOT NULL,          -- original name (shown to users)
+    stored_name  TEXT NOT NULL UNIQUE,   -- uuid.ext on disk
+    content_type TEXT,
+    size_bytes   BIGINT NOT NULL,
+    uploaded_by  TEXT NOT NULL,
+    uploaded_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_attach_part ON part_attachments (part_id);
+
 -- Sync run log — so we can see freshness / failures on the dashboard.
 CREATE TABLE IF NOT EXISTS sync_runs (
     id           BIGSERIAL PRIMARY KEY,

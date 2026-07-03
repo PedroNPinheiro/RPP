@@ -161,7 +161,14 @@ function renderLine(
           </td>
         );
       })}
-      <td className="open-cell">›</td>
+      <td className="open-cell">
+        {Number(p.attachment_count) > 0 && (
+          <span className="att-count" title={`${p.attachment_count} attachment(s)`}>
+            ⎘{p.attachment_count}
+          </span>
+        )}
+        ›
+      </td>
     </tr>
   );
 }

@@ -59,9 +59,10 @@ export const COLUMNS: Col[] = [
   { key: "notes", label: "Notes", type: "text", group: "team", editable: true, ellipsis: true },
 ];
 
-export const FIELD_LABELS: Record<string, string> = Object.fromEntries(
-  COLUMNS.map((c) => [String(c.key), c.label]),
-);
+export const FIELD_LABELS: Record<string, string> = {
+  ...Object.fromEntries(COLUMNS.map((c) => [String(c.key), c.label])),
+  attachment: "Attachment",
+};
 
 /* The table shows only the essentials — everything else lives in the
    detail drawer. This is what keeps the table free of horizontal scroll. */
