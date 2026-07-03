@@ -1,18 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { COLUMNS, type Col } from "../columns";
+import { TABLE_COLUMNS, type Col } from "../columns";
+import { fmtDate } from "../format";
 import { isCompleted } from "../logic";
 import type { Part } from "../types";
-import { fmtDate } from "../format";
 import { EditableCell } from "./EditableCell";
-import { IconClock } from "./Icons";
-
-/* frozen columns: PO, Code, Item stay visible during horizontal scroll */
-const STICKY: Partial<Record<string, string>> = {
-  poh_num: "stick stick-1",
-  item_code: "stick stick-2",
-  item_desc: "stick stick-3",
-};
-const stickyCls = (key: string) => STICKY[key] ?? "";
 
 /* when grouped, PO-level facts live in the group header, not on every line */
 const GROUP_HIDDEN = new Set<string>(["supplier_name", "po_date"]);
@@ -74,20 +65,25 @@ function FragmentRows({ header, lines }: { header: ReactNode; lines: ReactNode[]
   );
 }
 
-/* one PO line row; inside a group the PO cell shows only the line number */
+/* one PO line row — clicking it opens the detail drawer */
 function renderLine(
   p: Part,
   cols: Col[],
   inGroup: boolean,
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>,
-  onHistory: (p: Part) => void,
+  onOpen: (p: Part) => void,
+  selected: boolean,
 ) {
   return (
-    <tr key={p.id}>
+    <tr
+      key={p.id}
+      className={`line-row${selected ? " selected" : ""}`}
+      onClick={() => onOpen(p)}
+    >
       {cols.map((c) => {
         if (c.key === "poh_num") {
           return (
-            <td key="poh_num" className={`${stickyCls("poh_num")} ${inGroup ? "line-cell" : ""}`.trim()}>
+            <td key="poh_num" className={inGroup ? "line-cell" : "po-cell"}>
               {inGroup ? (
                 <span className="line-tag">line {p.poh_line}</span>
               ) : (
@@ -129,10 +125,10 @@ function renderLine(
             </td>
           );
         }
-        const numCls = c.type === "number" ? "num" : "";
         if (c.editable) {
+          // inline quick-edit; don't let the click bubble into the drawer
           return (
-            <td key={String(c.key)} className={`team ${numCls}`}>
+            <td key={String(c.key)} className="team" onClick={(e) => e.stopPropagation()}>
               <EditableCell part={p} col={c} onPatch={onPatch} />
             </td>
           );
@@ -140,12 +136,12 @@ function renderLine(
         const text = displayValue(p, c);
         if (c.key === "item_code") {
           return (
-            <td key="item_code" className={`code-cell ${stickyCls("item_code")}`.trim()}>
+            <td key="item_code" className="code-cell">
               {text}
             </td>
           );
         }
-        if (c.type === "date" && !c.editable) {
+        if (c.type === "date") {
           return (
             <td key={String(c.key)} className="date-cell">
               {text}
@@ -154,31 +150,18 @@ function renderLine(
         }
         if (c.ellipsis) {
           return (
-            <td
-              key={String(c.key)}
-              className={`ellipsis ${stickyCls(String(c.key))}`.trim()}
-              title={text}
-            >
+            <td key={String(c.key)} className="ellipsis" title={text}>
               {text}
             </td>
           );
         }
         return (
-          <td key={String(c.key)} className={`${numCls} ${stickyCls(String(c.key))}`.trim()}>
+          <td key={String(c.key)} className={c.type === "number" ? "num" : ""}>
             {text}
           </td>
         );
       })}
-      <td className="actions-cell">
-        <button
-          className="row-action"
-          title="Change history"
-          onClick={() => onHistory(p)}
-        >
-          <IconClock size={14} />
-        </button>
-      </td>
-      <td className="filler" aria-hidden />
+      <td className="open-cell">›</td>
     </tr>
   );
 }
@@ -189,17 +172,21 @@ interface Props {
   parts: Part[];
   totalCount: number;
   grouped: boolean;
+  selectedId: number | null;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
-  onHistory: (p: Part) => void;
+  onOpen: (p: Part) => void;
 }
 
-export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: Props) {
+export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, onOpen }: Props) {
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   const cols = useMemo(
-    () => (grouped ? COLUMNS.filter((c) => !GROUP_HIDDEN.has(String(c.key))) : COLUMNS),
+    () =>
+      grouped
+        ? TABLE_COLUMNS.filter((c) => !GROUP_HIDDEN.has(String(c.key)))
+        : TABLE_COLUMNS,
     [grouped],
   );
 
@@ -212,7 +199,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
     });
 
   const sorted = useMemo(() => {
-    const col = COLUMNS.find((c) => c.key === sortKey);
+    const col = TABLE_COLUMNS.find((c) => c.key === sortKey);
     const numeric = col?.type === "number";
     return [...parts].sort((a, b) => {
       const av = a[sortKey];
@@ -261,12 +248,11 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
                   className={[
                     c.type === "number" ? "num" : "",
                     c.editable ? "th-team" : "",
-                    stickyCls(String(c.key)),
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   onClick={() => toggleSort(c.key)}
-                  title={c.editable ? "Editable — click to sort" : "Click to sort"}
+                  title="Click to sort"
                 >
                   {c.label}
                   {sortKey === c.key && (
@@ -274,8 +260,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
                   )}
                 </th>
               ))}
-              <th className="actions-th" aria-hidden />
-              <th className="filler" aria-hidden />
+              <th className="open-th" aria-hidden />
             </tr>
           </thead>
           <tbody>
@@ -289,7 +274,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={cols.length + 2}>
+                          <td colSpan={cols.length + 1}>
                             <div className="po-header-content">
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
@@ -306,14 +291,22 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
                           </td>
                         </tr>
                       }
-                      lines={isOpen ? lines.map((p) => renderLine(p, cols, true, onPatch, onHistory)) : []}
+                      lines={
+                        isOpen
+                          ? lines.map((p) =>
+                              renderLine(p, cols, true, onPatch, onOpen, p.id === selectedId),
+                            )
+                          : []
+                      }
                     />
                   );
                 })
-              : sorted.map((p) => renderLine(p, cols, false, onPatch, onHistory))}
+              : sorted.map((p) =>
+                  renderLine(p, cols, false, onPatch, onOpen, p.id === selectedId),
+                )}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={cols.length + 2} className="empty">
+                <td colSpan={cols.length + 1} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}
@@ -327,7 +320,7 @@ export function PartsTable({ parts, totalCount, grouped, onPatch, onHistory }: P
         <span>
           Showing {parts.length} of {totalCount} line{totalCount === 1 ? "" : "s"}
         </span>
-        <span>Sage data is read-only · amber columns are yours to edit</span>
+        <span>Click a line to open its details</span>
       </div>
     </div>
   );

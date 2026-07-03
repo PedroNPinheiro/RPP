@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Part } from "../types";
 import { isCompleted, isDelayed } from "../logic";
-import { HistoryModal } from "../components/HistoryModal";
+import { PartDetail } from "../components/PartDetail";
 import { PartsTable } from "../components/PartsTable";
 import { StatTiles } from "../components/StatTiles";
 import { exportCsv } from "../csv";
@@ -18,7 +18,13 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
   const [grouped, setGrouped] = useState(true);
-  const [historyPart, setHistoryPart] = useState<Part | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  // derive from the live list so drawer edits show immediately
+  const selected = useMemo(
+    () => parts.find((p) => p.id === selectedId) ?? null,
+    [parts, selectedId],
+  );
 
   const visible = useMemo(() => {
     let rows = parts;
@@ -109,14 +115,15 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         parts={visible}
         totalCount={parts.length}
         grouped={grouped}
+        selectedId={selectedId}
         onPatch={onPatch}
-        onHistory={setHistoryPart}
+        onOpen={(p) => setSelectedId(p.id)}
       />
 
-      {historyPart && (
-        <HistoryModal
-          part={historyPart}
-          onClose={() => setHistoryPart(null)}
+      {selected && (
+        <PartDetail
+          part={selected}
+          onClose={() => setSelectedId(null)}
           onPatch={onPatch}
         />
       )}

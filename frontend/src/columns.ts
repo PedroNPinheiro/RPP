@@ -56,3 +56,33 @@ export const COLUMNS: Col[] = [
 export const FIELD_LABELS: Record<string, string> = Object.fromEntries(
   COLUMNS.map((c) => [String(c.key), c.label]),
 );
+
+/* The table shows only the essentials — everything else lives in the
+   detail drawer. This is what keeps the table free of horizontal scroll. */
+const TABLE_KEYS: (keyof Part)[] = [
+  "poh_num", "item_code", "item_desc", "qty_ordered", "qty_received",
+  "balance_qty", "line_value", "po_date", "supplier_name",
+  "expected_receipt", "delay_days", "status", "priority",
+];
+export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
+  (k) => COLUMNS.find((c) => c.key === k)!,
+);
+
+/* Detail drawer form, grouped into sections */
+export const DETAIL_GROUPS: { title: string; keys: (keyof Part)[] }[] = [
+  { title: "Workflow", keys: ["status", "priority"] },
+  { title: "References", keys: ["of_number", "pc_number", "tank"] },
+  { title: "Logistics", keys: ["dest_type", "shipping_method", "tracking"] },
+  {
+    title: "Dates",
+    keys: [
+      "entregue_war", "sent_to_production", "production_closing",
+      "estimated_date", "required_ship", "real_ship_date", "eta_pc",
+    ],
+  },
+  { title: "Drawings", keys: ["drawings_required", "drawings_desc"] },
+  { title: "Notes", keys: ["notes"] },
+];
+
+export const colByKey = (k: keyof Part): Col | undefined =>
+  COLUMNS.find((c) => c.key === k);
