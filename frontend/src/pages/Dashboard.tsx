@@ -4,6 +4,7 @@ import { isCompleted, isDelayed } from "../logic";
 import { HistoryModal } from "../components/HistoryModal";
 import { PartsTable } from "../components/PartsTable";
 import { StatTiles } from "../components/StatTiles";
+import { exportCsv } from "../csv";
 
 type View = "open" | "delayed" | "completed" | "all";
 
@@ -59,7 +60,7 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         </div>
       </div>
 
-      <StatTiles parts={parts} />
+      <StatTiles parts={parts} onSelect={setView} />
 
       <div className="toolbar">
         <div className="seg">
@@ -87,6 +88,13 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
           >
             Group by PO
           </button>
+          <button
+            className="btn"
+            onClick={() => exportCsv(visible)}
+            title="Download the current view as CSV (opens in Excel)"
+          >
+            ⬇ Export
+          </button>
           <input
             className="search"
             type="search"
@@ -106,7 +114,11 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
       />
 
       {historyPart && (
-        <HistoryModal part={historyPart} onClose={() => setHistoryPart(null)} />
+        <HistoryModal
+          part={historyPart}
+          onClose={() => setHistoryPart(null)}
+          onPatch={onPatch}
+        />
       )}
     </>
   );

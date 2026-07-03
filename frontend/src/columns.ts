@@ -52,3 +52,7 @@ export const COLUMNS: Col[] = [
   { key: "tracking", label: "Tracking", type: "text", group: "team", editable: true },
   { key: "notes", label: "Notes", type: "text", group: "team", editable: true, ellipsis: true },
 ];
+
+export const FIELD_LABELS: Record<string, string> = Object.fromEntries(
+  COLUMNS.map((c) => [String(c.key), c.label]),
+);

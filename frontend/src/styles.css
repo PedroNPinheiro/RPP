@@ -289,6 +289,12 @@ body {
 .t-green { background: var(--good-wash); color: var(--good-text); }
 .t-neutral { background: color-mix(in srgb, var(--ink-3) 12%, transparent); color: var(--ink-2); }
 
+.tile-btn { cursor: pointer; }
+.tile-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.1);
+}
+
 .tile .label { font-size: 12px; color: var(--ink-3); }
 .tile .value {
   font-size: 24px;
@@ -536,8 +542,11 @@ tbody tr:hover td.stick {
 }
 tbody td.stick-3 { font-weight: 500; }
 
-/* ---------- PO group headers ---------- */
+/* ---------- PO group headers (stick below the column header) ---------- */
 .po-header td {
+  position: sticky;
+  top: 37px;
+  z-index: 1;
   background: color-mix(in srgb, var(--accent) 4%, var(--surface));
   border-bottom: 1px solid var(--grid);
   border-left: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
@@ -765,6 +774,38 @@ tbody tr:hover .row-action { opacity: 1; }
 }
 .audit-arrow { color: var(--ink-3); }
 .audit-new { font-weight: 600; color: var(--accent); }
+
+.audit-restore {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.audit-restore:hover {
+  color: var(--accent);
+  background: var(--hover-wash);
+}
+.audit-restore:disabled { opacity: 0.4; cursor: default; }
+
+/* activity page */
+.activity-list {
+  padding: 4px 18px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.activity-row .audit-meta { flex-wrap: wrap; }
+.activity-ref {
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60ch;
+}
 
 /* footer strip under the table */
 .table-foot {

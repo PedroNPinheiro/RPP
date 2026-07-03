@@ -9,11 +9,16 @@ interface Props {
   value: ReactNode;
   context?: string;
   crit?: boolean;
+  onClick?: () => void;
 }
 
-export function Tile({ icon, tint, label, value, context, crit }: Props) {
+export function Tile({ icon, tint, label, value, context, crit, onClick }: Props) {
   return (
-    <div className="tile">
+    <div
+      className={`tile${onClick ? " tile-btn" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+    >
       <div className="tile-body">
         <div className="label">{label}</div>
         <div className={`value${crit ? " crit" : ""}`}>{value}</div>

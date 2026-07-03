@@ -3,8 +3,11 @@ import type { Part } from "../types";
 import { IconAlert, IconBanknote, IconClock, IconLayers } from "./Icons";
 import { Tile } from "./Tile";
 
+type View = "open" | "delayed" | "completed" | "all";
+
 interface Props {
   parts: Part[];
+  onSelect?: (view: View) => void;
 }
 
 function compactCurrency(total: number, currency: string): string {
@@ -16,7 +19,7 @@ function compactCurrency(total: number, currency: string): string {
   }).format(total);
 }
 
-export function StatTiles({ parts }: Props) {
+export function StatTiles({ parts, onSelect }: Props) {
   const delayed = parts.filter(isDelayed).length;
   const openParts = parts.filter((p) => !isCompleted(p));
   const currency = parts.find((p) => p.currency)?.currency ?? "EUR";
@@ -30,6 +33,7 @@ export function StatTiles({ parts }: Props) {
         label="PO lines"
         value={parts.length}
         context="flagged Replacement Parts"
+        onClick={onSelect && (() => onSelect("all"))}
       />
       <Tile
         icon={<IconClock />}
@@ -37,6 +41,7 @@ export function StatTiles({ parts }: Props) {
         label="Open"
         value={openParts.length}
         context="not yet completed"
+        onClick={onSelect && (() => onSelect("open"))}
       />
       <Tile
         icon={<IconAlert />}
@@ -45,6 +50,7 @@ export function StatTiles({ parts }: Props) {
         value={delayed}
         context="past expected date"
         crit={delayed > 0}
+        onClick={onSelect && (() => onSelect("delayed"))}
       />
       <Tile
         icon={<IconBanknote />}
@@ -52,6 +58,7 @@ export function StatTiles({ parts }: Props) {
         label="Open value"
         value={compactCurrency(totalValue, currency)}
         context="sum of open lines"
+        onClick={onSelect && (() => onSelect("open"))}
       />
     </div>
   );

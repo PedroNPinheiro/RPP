@@ -1,42 +1,53 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAudit } from "../api";
-import { COLUMNS } from "../columns";
+import { COLUMNS, FIELD_LABELS } from "../columns";
+import { fmtDateTime } from "../format";
 import type { AuditEntry, Part } from "../types";
 
-const FIELD_LABELS: Record<string, string> = Object.fromEntries(
-  COLUMNS.map((c) => [String(c.key), c.label]),
-);
-
-function fmtWhen(iso: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  return `${d.toLocaleDateString(undefined, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  })} ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+/* audit stores strings; convert back to the field's real type for a PATCH */
+function coerce(field: string, raw: string | null): unknown {
+  if (raw === null) return null;
+  const col = COLUMNS.find((c) => String(c.key) === field);
+  if (col?.type === "bool") return raw === "True" || raw === "true";
+  return raw;
 }
 
 interface Props {
   part: Part;
   onClose: () => void;
+  onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
 }
 
-export function HistoryModal({ part, onClose }: Props) {
+export function HistoryModal({ part, onClose, onPatch }: Props) {
   const [entries, setEntries] = useState<AuditEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
+  const loadEntries = useCallback(() => {
     getAudit(part.id)
       .then(setEntries)
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [part.id]);
 
   useEffect(() => {
+    loadEntries();
+  }, [loadEntries]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  const restore = async (e: AuditEntry) => {
+    setBusy(true);
+    try {
+      await onPatch(part.id, { [e.field]: coerce(e.field, e.old_value) } as Partial<Part>);
+      loadEntries(); // the restore itself becomes a new audit entry
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -62,8 +73,16 @@ export function HistoryModal({ part, onClose }: Props) {
           {entries?.map((e, i) => (
             <div key={i} className="audit-row">
               <div className="audit-meta">
-                <span className="audit-when">{fmtWhen(e.changed_at)}</span>
+                <span className="audit-when">{fmtDateTime(e.changed_at)}</span>
                 <span className="audit-who">{e.changed_by}</span>
+                <button
+                  className="audit-restore"
+                  disabled={busy}
+                  title={`Set ${FIELD_LABELS[e.field] ?? e.field} back to "${e.old_value ?? "—"}"`}
+                  onClick={() => restore(e)}
+                >
+                  ↩ restore
+                </button>
               </div>
               <div className="audit-change">
                 <span className="audit-field">{FIELD_LABELS[e.field] ?? e.field}</span>

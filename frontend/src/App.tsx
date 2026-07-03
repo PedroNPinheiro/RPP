@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { getParts, getSyncStatus, patchPart } from "./api";
 import type { Part, SyncStatus } from "./types";
-import { IconChart, IconGrid } from "./components/Icons";
+import { IconChart, IconClock, IconGrid } from "./components/Icons";
 import { SyncBanner } from "./components/SyncBanner";
+import { Activity } from "./pages/Activity";
 import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
 
@@ -45,22 +46,30 @@ export default function App() {
     localStorage.setItem("rpp-theme", theme);
   }, [theme]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [p, s] = await Promise.all([getParts(), getSyncStatus()]);
       setParts(p);
       setSync(s);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!silent) setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  // keep data fresh without flashing the UI (sync runs every 15 min anyway)
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!document.hidden) load(true);
+    }, 120_000);
+    return () => clearInterval(id);
   }, [load]);
 
   const handlePatch = useCallback(async (id: number, fields: Partial<Part>) => {
@@ -90,6 +99,14 @@ export default function App() {
           <span>Analytics</span>
           <span className="nav-chev">›</span>
         </NavLink>
+        <NavLink
+          to="/activity"
+          className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}
+        >
+          <IconClock />
+          <span>Activity</span>
+          <span className="nav-chev">›</span>
+        </NavLink>
       </aside>
 
       <div className="main">
@@ -101,7 +118,7 @@ export default function App() {
           >
             {theme === "dark" ? "☀" : "☾"}
           </button>
-          <SyncBanner sync={sync} onRefresh={load} />
+          <SyncBanner sync={sync} onRefresh={() => load()} />
         </header>
 
         <main className="content">
@@ -112,6 +129,7 @@ export default function App() {
               element={<Dashboard parts={parts} loading={loading} onPatch={handlePatch} />}
             />
             <Route path="/analytics" element={<Analytics parts={parts} loading={loading} />} />
+            <Route path="/activity" element={<Activity />} />
           </Routes>
         </main>
       </div>

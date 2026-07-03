@@ -77,6 +77,9 @@ export function EditableCell({ part, col, onPatch }: Props) {
       className={`cell-input${emptyDate ? " empty-date" : ""}`}
       type={col.type === "date" ? "date" : "text"}
       defaultValue={(value ?? "") as string}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+      }}
       onBlur={(e) => {
         const next = e.target.value === "" ? null : e.target.value;
         const current = (value ?? null) as string | null;

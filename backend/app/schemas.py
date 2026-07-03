@@ -99,3 +99,10 @@ class AuditEntry(BaseModel):
     new_value: Optional[str] = None
     changed_by: Optional[str] = None
     changed_at: Optional[datetime] = None
+
+
+class RecentAuditEntry(AuditEntry):
+    part_id: int
+    poh_num: str
+    poh_line: int
+    item_desc: Optional[str] = None

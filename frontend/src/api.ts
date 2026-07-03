@@ -1,4 +1,4 @@
-import type { AuditEntry, Part, SyncStatus } from "./types";
+import type { AuditEntry, Part, RecentAuditEntry, SyncStatus } from "./types";
 
 const BASE = "/api";
 
@@ -21,6 +21,12 @@ export async function patchPart(id: number, fields: Partial<Part>): Promise<Part
 export async function getSyncStatus(): Promise<SyncStatus | null> {
   const r = await fetch(`${BASE}/sync-status`);
   if (!r.ok) return null;
+  return r.json();
+}
+
+export async function getRecentAudit(limit = 50): Promise<RecentAuditEntry[]> {
+  const r = await fetch(`${BASE}/audit/recent?limit=${limit}`);
+  if (!r.ok) throw new Error(`Failed to load activity (${r.status})`);
   return r.json();
 }
 

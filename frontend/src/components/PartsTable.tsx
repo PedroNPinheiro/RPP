@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { COLUMNS, type Col } from "../columns";
 import { isCompleted } from "../logic";
 import type { Part } from "../types";
+import { fmtDate } from "../format";
 import { EditableCell } from "./EditableCell";
 import { IconClock } from "./Icons";
 
@@ -33,13 +34,6 @@ function fmtCurrency(v: unknown, currency: string | null): string {
     currency: currency || "EUR",
     maximumFractionDigits: 2,
   }).format(n);
-}
-
-function fmtDate(v: unknown): string {
-  if (!v) return "";
-  const d = new Date(String(v));
-  if (Number.isNaN(d.getTime())) return String(v);
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function displayValue(part: Part, col: Col): string {

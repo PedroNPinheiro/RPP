@@ -67,3 +67,10 @@ export interface AuditEntry {
   changed_by: string | null;
   changed_at: string | null;
 }
+
+export interface RecentAuditEntry extends AuditEntry {
+  part_id: number;
+  poh_num: string;
+  poh_line: number;
+  item_desc: string | null;
+}
