@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { aggregateByMonth, fmtEUR, MONTH_SHORT, years } from "../analytics";
 import { ColumnChart, type ChartDatum } from "../components/ColumnChart";
+import { PageHeader } from "../components/PageHeader";
 import { IconBanknote, IconCheckCircle, IconClock, IconLayers } from "../components/Icons";
 import { Tile } from "../components/Tile";
 import { isCompleted } from "../logic";
@@ -57,19 +58,22 @@ export function Analytics({ parts, loading }: Props) {
 
   return (
     <>
-      <div className="page-head">
-        <h2>Analytics</h2>
-        <div className="seg">
-          <button className={year === "all" ? "on" : ""} onClick={() => setYear("all")}>
-            All years
-          </button>
-          {yearList.map((y) => (
-            <button key={y} className={year === y ? "on" : ""} onClick={() => setYear(y)}>
-              {y}
+      <PageHeader
+        title="Analytics"
+        sub="Open vs completed value over time"
+        extra={
+          <div className="seg">
+            <button className={year === "all" ? "on" : ""} onClick={() => setYear("all")}>
+              All years
             </button>
-          ))}
-        </div>
-      </div>
+            {yearList.map((y) => (
+              <button key={y} className={year === y ? "on" : ""} onClick={() => setYear(y)}>
+                {y}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="tiles">
         <Tile

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Part } from "../types";
 import { isCompleted, isDelayed } from "../logic";
+import { PageHeader } from "../components/PageHeader";
 import { PartDetail } from "../components/PartDetail";
 import { PartsTable } from "../components/PartsTable";
 import { StatTiles } from "../components/StatTiles";
@@ -56,15 +57,10 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h2>Dashboard</h2>
-          <div className="page-sub">
-            {parts.length} line{parts.length === 1 ? "" : "s"} · live from Sage X3 · syncs
-            every 15 min
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        sub={`${parts.length} line${parts.length === 1 ? "" : "s"} · live from Sage X3 · syncs every 15 min`}
+      />
 
       <StatTiles parts={parts} onSelect={setView} />
 

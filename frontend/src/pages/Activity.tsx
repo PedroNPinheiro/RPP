@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getRecentAudit } from "../api";
 import { FIELD_LABELS } from "../columns";
 import { fmtDateTime } from "../format";
+import { PageHeader } from "../components/PageHeader";
 import type { RecentAuditEntry } from "../types";
 
 export function Activity() {
@@ -16,12 +17,7 @@ export function Activity() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h2>Activity</h2>
-          <div className="page-sub">Recent changes made by the team, newest first</div>
-        </div>
-      </div>
+      <PageHeader title="Activity" sub="Recent changes made by the team, newest first" />
 
       {error && <div className="error">⚠ {error}</div>}
       {!entries && !error && <div className="loading">Loading…</div>}

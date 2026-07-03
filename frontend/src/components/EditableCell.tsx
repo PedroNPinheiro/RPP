@@ -50,7 +50,7 @@ export function EditableCell({ part, col, onPatch }: Props) {
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
     const select = (
       <select
-        className={`cell-input cell-select${tone}`}
+        className={`cell-input cell-select${tone}${v ? "" : " sel-empty"}`}
         value={v}
         onChange={(e) => {
           const next = e.target.value === "" ? null : e.target.value;

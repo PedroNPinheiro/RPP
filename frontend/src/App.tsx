@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { getParts, getSyncStatus, patchPart } from "./api";
+import { AppCtx } from "./AppCtx";
 import type { Part, SyncStatus } from "./types";
 import { IconChart, IconClock, IconGrid } from "./components/Icons";
-import { SyncBanner } from "./components/SyncBanner";
 import { Activity } from "./pages/Activity";
 import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
@@ -81,7 +81,15 @@ export default function App() {
     }
   }, []);
 
+  const ctx = {
+    theme,
+    toggleTheme: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+    sync,
+    reload: () => load(),
+  };
+
   return (
+    <AppCtx.Provider value={ctx}>
     <div className="shell">
       <aside className="sidebar">
         <LogoCard />
@@ -110,17 +118,6 @@ export default function App() {
       </aside>
 
       <div className="main">
-        <header className="topbar">
-          <button
-            className="btn icon-btn"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-          >
-            {theme === "dark" ? "☀" : "☾"}
-          </button>
-          <SyncBanner sync={sync} onRefresh={() => load()} />
-        </header>
-
         <main className="content">
           {error && <div className="error">⚠ {error}</div>}
           <Routes>
@@ -134,5 +131,6 @@ export default function App() {
         </main>
       </div>
     </div>
+    </AppCtx.Provider>
   );
 }
