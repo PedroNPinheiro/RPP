@@ -48,32 +48,28 @@ export function EditableCell({ part, col, onPatch }: Props) {
     else if (col.key === "status" && v.startsWith("Problema")) tone = " sel-crit";
     else if (col.key === "status" && (v === "Em Andamento" || v === "Em progresso")) tone = " sel-info";
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
-    const select = (
-      <select
-        className={`cell-input cell-select${tone}${v ? "" : " sel-empty"}`}
-        value={v}
-        onChange={(e) => {
-          const next = e.target.value === "" ? null : e.target.value;
-          onPatch(part.id, { [col.key]: next } as Partial<Part>);
-        }}
-      >
-        <option value=""> </option>
-        {col.options?.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-        {/* keep a legacy value visible even if it's not in the option list */}
-        {value && !col.options?.includes(String(value)) && (
-          <option value={String(value)}>{String(value)}</option>
-        )}
-      </select>
-    );
-    if (!dot) return select;
     return (
-      <span className="sel-wrap">
-        <span className={`status-dot ${dot}`} />
-        {select}
+      <span className={`pill-select${tone}${v ? "" : " sel-empty"}`}>
+        {dot && <span className={`status-dot ${dot}`} />}
+        <select
+          className="pill-select-input"
+          value={v}
+          onChange={(e) => {
+            const next = e.target.value === "" ? null : e.target.value;
+            onPatch(part.id, { [col.key]: next } as Partial<Part>);
+          }}
+        >
+          <option value=""> </option>
+          {col.options?.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+          {/* keep a legacy value visible even if it's not in the option list */}
+          {value && !col.options?.includes(String(value)) && (
+            <option value={String(value)}>{String(value)}</option>
+          )}
+        </select>
       </span>
     );
   }

@@ -178,10 +178,10 @@ body {
 
 
 .content {
-  padding: 28px 36px 48px;
-  max-width: 1300px;
+  padding: 28px 40px 48px;
+  max-width: 1360px;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
 }
 
 /* ---------- page head ---------- */
@@ -542,13 +542,13 @@ td.date-cell {
   position: sticky;
   top: 41px;
   z-index: 1;
-  background: var(--page);
+  background: color-mix(in srgb, var(--ink-1) 5%, var(--surface));
   border-bottom: 1px solid var(--grid);
   padding: 0;
   cursor: pointer;
 }
 .po-header:hover td {
-  background: color-mix(in srgb, var(--accent) 8%, var(--page));
+  background: color-mix(in srgb, var(--ink-1) 8%, var(--surface));
 }
 .po-header-content {
   position: sticky;
@@ -1026,3 +1026,49 @@ td.po-cell { font-variant-numeric: tabular-nums; }
   font-weight: 550;
 }
 .panel-link:hover { text-decoration: underline; }
+
+/* ---------- inline pill selects (dot inside the pill) ---------- */
+.pill-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ring);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 3px 6px 3px 11px;
+  max-width: 195px;
+}
+.pill-select-input {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: inherit;
+  appearance: none;
+  cursor: pointer;
+  padding-right: 14px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pill-select:hover .pill-select-input,
+.pill-select:focus-within .pill-select-input {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238a94a6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+}
+.pill-select.sel-empty {
+  border-color: transparent;
+  background: transparent;
+}
+tr.line-row:hover .pill-select.sel-empty {
+  border-color: var(--ring);
+  background: var(--surface);
+}
+.pill-select.sel-crit { color: var(--critical); font-weight: 600; }
+.pill-select.sel-warn { color: var(--team-ink); font-weight: 600; }
+.pill-select.sel-good { color: var(--good-text); font-weight: 600; }
+.pill-select.sel-info { color: var(--accent); font-weight: 600; }
+.pill-select .pill-select-input option { color: var(--ink-1); background: var(--surface); }
