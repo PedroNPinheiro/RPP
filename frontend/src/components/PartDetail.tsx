@@ -304,7 +304,7 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
                   href={attachmentUrl(a.id)}
                   target="_blank"
                   rel="noreferrer"
-                  title={a.filename}
+                  title={`Preview ${a.filename}`}
                 >
                   ⎘ {a.filename}
                 </a>
@@ -314,6 +314,13 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
                     : `${(a.size_bytes / 1048576).toFixed(1)} MB`)}{" "}
                   · {a.uploaded_by}
                 </span>
+                <a
+                  className="att-del att-dl"
+                  href={attachmentUrl(a.id, true)}
+                  title="Download"
+                >
+                  ↓
+                </a>
                 <button
                   className="att-del"
                   title="Delete attachment"

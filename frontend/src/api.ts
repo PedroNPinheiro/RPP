@@ -61,4 +61,5 @@ export async function deleteAttachment(id: number): Promise<void> {
   if (!r.ok) throw new Error(`Delete failed (${r.status})`);
 }
 
-export const attachmentUrl = (id: number) => `${BASE}/attachments/${id}/download`;
+export const attachmentUrl = (id: number, download = false) =>
+  `${BASE}/attachments/${id}/download${download ? "?download=1" : ""}`;

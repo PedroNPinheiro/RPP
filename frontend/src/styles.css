@@ -1124,3 +1124,5 @@ tr.line-row:hover .pill-select.sel-empty {
   font-size: 11px;
 }
 .att-del:hover { color: var(--critical); background: var(--critical-wash); }
+.att-dl { text-decoration: none; font-size: 13px; }
+.att-dl:hover { color: var(--accent); background: var(--hover-wash); }

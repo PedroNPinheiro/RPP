@@ -83,7 +83,9 @@ async def upload_attachment(
 
 
 @router.get("/api/attachments/{attachment_id}/download")
-def download_attachment(attachment_id: int, user: dict = Depends(get_current_user)):
+def download_attachment(
+    attachment_id: int, download: bool = False, user: dict = Depends(get_current_user)
+):
     with pool.connection() as conn:
         conn.row_factory = dict_row
         row = conn.execute(
@@ -95,10 +97,13 @@ def download_attachment(attachment_id: int, user: dict = Depends(get_current_use
     path = Path(settings.upload_dir) / row["stored_name"]
     if not path.is_file():
         raise HTTPException(status_code=410, detail="File missing on disk")
+    # inline lets the browser preview PDFs/images in a tab;
+    # ?download=1 forces a save dialog
     return FileResponse(
         path,
         filename=row["filename"],
         media_type=row["content_type"] or "application/octet-stream",
+        content_disposition_type="attachment" if download else "inline",
     )
 
 
