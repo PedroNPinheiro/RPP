@@ -5,6 +5,16 @@ import { isCompleted } from "../logic";
 import type { Part } from "../types";
 import { EditableCell } from "./EditableCell";
 
+/* row background wash by status (like the source sheet) */
+const STATUS_ROW: Record<string, string> = {
+  "Em Andamento": "row-prog",                 // yellow
+  "Problema/Falta de Informação": "row-crit", // red
+  "Enviado/Já Saiu": "row-done",              // blue
+  // legacy values
+  "Em progresso": "row-prog",
+  Completo: "row-done",
+};
+
 /* when grouped, PO-level facts live in the group header, not on every line */
 const GROUP_HIDDEN = new Set<string>(["supplier_name", "po_date"]);
 
@@ -77,7 +87,9 @@ function renderLine(
   return (
     <tr
       key={p.id}
-      className={`line-row${selected ? " selected" : ""}`}
+      className={`line-row${selected ? " selected" : ""}${
+        p.status && STATUS_ROW[p.status] ? ` ${STATUS_ROW[p.status]}` : ""
+      }`}
       onClick={() => onOpen(p)}
     >
       {cols.map((c) => {

@@ -1222,3 +1222,10 @@ tr.line-row:hover .pill-select.sel-empty {
   margin-right: 8px;
   vertical-align: -1px;
 }
+
+/* ---------- status row washes ---------- */
+tr.row-prog td { background: color-mix(in srgb, #fab219 14%, var(--surface)); }
+tr.row-crit td { background: color-mix(in srgb, var(--critical) 13%, var(--surface)); }
+tr.row-done td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+tr.line-row:hover td { background: var(--hover-wash); }
+tr.line-row.selected td { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
