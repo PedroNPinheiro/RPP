@@ -15,6 +15,17 @@ export interface Col {
 
 export const PRIORITY_OPTIONS = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];
 export const DEST_TYPE_OPTIONS = ["CSS - Stock", "CSR - Replacement"];
+export const SHIPPING_OPTIONS = [
+  "1 - UPS",
+  "2 - Truck",
+  "3 - Container MSC",
+  "4 - Air Pallet",
+  "5 - Self Transport by Engineer",
+  "6 - Costumer to Collect",
+  "7 - To Be Defined",
+  "8 - DPD",
+  "9 - Direct Delivery from Supplier",
+];
 export const STATUS_OPTIONS = [
   "Por Iniciar",
   "Em Andamento",
@@ -44,7 +55,7 @@ export const COLUMNS: Col[] = [
   { key: "of_number", label: "OF", type: "text", group: "team", editable: true },
   { key: "pc_number", label: "PC", type: "text", group: "team", editable: true },
   { key: "dest_type", label: "Dest Type", type: "select", group: "team", editable: true, options: DEST_TYPE_OPTIONS },
-  { key: "shipping_method", label: "Shipping", type: "text", group: "team", editable: true },
+  { key: "shipping_method", label: "Shipping", type: "select", group: "team", editable: true, options: SHIPPING_OPTIONS },
   { key: "tank", label: "Tank", type: "text", group: "team", editable: true },
   { key: "entregue_war", label: "Entregue WAR", type: "date", group: "team", editable: true },
   { key: "sent_to_production", label: "Sent to Prod", type: "date", group: "team", editable: true },
