@@ -4,6 +4,7 @@ import type { Bar } from "../charts";
 interface Props {
   title: string;
   bars: Bar[];
+  format?: (n: number) => string;
 }
 
 function topRoundedRect(x: number, y: number, w: number, h: number, r: number): string {
@@ -26,11 +27,12 @@ function niceMax(v: number): number {
   return 10 * pow;
 }
 
-const M = { top: 22, right: 12, bottom: 46, left: 40 };
+const M = { top: 22, right: 12, bottom: 46, left: 52 };
 const PLOT_H = 210;
 const BAR_MAX = 66;
 
-export function BarChart({ title, bars }: Props) {
+export function BarChart({ title, bars, format }: Props) {
+  const fmt = format ?? ((n: number) => String(Math.round(n)));
   const [hover, setHover] = useState<number | null>(null);
 
   const n = Math.max(bars.length, 1);
@@ -64,7 +66,7 @@ export function BarChart({ title, bars }: Props) {
                   className={t === 0 ? "axis-baseline" : "gridline"}
                 />
                 <text x={M.left - 8} y={yOf(t) + 3} className="tick-label" textAnchor="end">
-                  {Math.round(t)}
+                  {fmt(t)}
                 </text>
               </g>
             ))}
@@ -88,7 +90,7 @@ export function BarChart({ title, bars }: Props) {
                     className="bar-value"
                     textAnchor="middle"
                   >
-                    {b.value}
+                    {fmt(b.value)}
                   </text>
                   <foreignObject
                     x={M.left + i * bandW}

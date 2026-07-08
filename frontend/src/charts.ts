@@ -86,6 +86,62 @@ export interface LineSeries {
   values: number[];
 }
 
+/* ---- interactive explorer: group any dimension, measure count or value ---- */
+export type DimKey =
+  | "status"
+  | "priority"
+  | "dest_type"
+  | "supplier_name"
+  | "shipping_method"
+  | "line_site";
+
+export const DIMENSIONS: { key: DimKey; label: string }[] = [
+  { key: "status", label: "Status" },
+  { key: "priority", label: "Priority" },
+  { key: "dest_type", label: "Dest Type" },
+  { key: "supplier_name", label: "Supplier" },
+  { key: "shipping_method", label: "Shipping" },
+  { key: "line_site", label: "Site" },
+];
+
+export type Measure = "count" | "value";
+
+// categorical palette for dimensions that aren't status/priority
+const CAT_PALETTE = [
+  "#2a78d6", "#1baf7a", "#eda100", "#008300", "#4a3aa7",
+  "#e34948", "#e87ba4", "#eb6834",
+];
+
+function dimColor(dim: DimKey, bucket: string, index: number): string {
+  if (dim === "status") return STATUS_COLORS[bucket] ?? OTHER_COLOR;
+  if (dim === "priority") return PRIORITY_COLORS[bucket] ?? OTHER_COLOR;
+  return CAT_PALETTE[index % CAT_PALETTE.length];
+}
+
+export function distinctValues(parts: Part[], key: DimKey): string[] {
+  return [...new Set(parts.map((p) => (p[key] as string | null) || "").filter(Boolean))].sort();
+}
+
+export function summarize(parts: Part[], dim: DimKey, measure: Measure): Bar[] {
+  const totals = new Map<string, number>();
+  for (const p of parts) {
+    const key = (p[dim] as string | null) || NONE_BUCKET;
+    const add = measure === "value" ? Number(p.line_value) || 0 : 1;
+    totals.set(key, (totals.get(key) ?? 0) + add);
+  }
+  let ordered: string[];
+  if (dim === "status" || dim === "priority") {
+    ordered = orderBuckets(dim, [...totals.keys()]);
+  } else {
+    ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  }
+  return ordered.map((label, i) => ({
+    label,
+    value: totals.get(label) ?? 0,
+    color: dimColor(dim, label, i),
+  }));
+}
+
 export function pivotSnapshots(
   rows: SnapshotRow[],
   dim: Dim,
