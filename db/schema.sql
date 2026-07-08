@@ -91,6 +91,17 @@ CREATE TABLE IF NOT EXISTS part_attachments (
 );
 CREATE INDEX IF NOT EXISTS idx_attach_part ON part_attachments (part_id);
 
+-- Daily distribution snapshots for the Analytics history charts. One row per
+-- (day, dimension, bucket). Rebuilt for "today" whenever analytics is viewed;
+-- past days stay frozen, so the line charts accumulate real history over time.
+CREATE TABLE IF NOT EXISTS status_snapshot (
+    snap_date DATE NOT NULL,
+    dimension TEXT NOT NULL,   -- 'status' | 'priority'
+    bucket    TEXT NOT NULL,
+    count     INTEGER NOT NULL,
+    PRIMARY KEY (snap_date, dimension, bucket)
+);
+
 -- Sync run log — so we can see freshness / failures on the dashboard.
 CREATE TABLE IF NOT EXISTS sync_runs (
     id           BIGSERIAL PRIMARY KEY,

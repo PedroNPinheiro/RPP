@@ -1,4 +1,5 @@
 import type { Attachment, AuditEntry, Part, RecentAuditEntry, SyncStatus } from "./types";
+import type { SnapshotResponse } from "./charts";
 
 const BASE = "/api";
 
@@ -63,3 +64,9 @@ export async function deleteAttachment(id: number): Promise<void> {
 
 export const attachmentUrl = (id: number, download = false) =>
   `${BASE}/attachments/${id}/download${download ? "?download=1" : ""}`;
+
+export async function getSnapshots(): Promise<SnapshotResponse> {
+  const r = await fetch(`${BASE}/analytics/snapshots`);
+  if (!r.ok) throw new Error(`Failed to load history (${r.status})`);
+  return r.json();
+}
