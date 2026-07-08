@@ -122,6 +122,34 @@ export function distinctValues(parts: Part[], key: DimKey): string[] {
   return [...new Set(parts.map((p) => (p[key] as string | null) || "").filter(Boolean))].sort();
 }
 
+export interface Breakdown {
+  label: string;
+  color: string;
+  count: number;
+  value: number;
+}
+
+/* per-bucket count AND value (the bar chart shows one; the table shows both) */
+export function breakdown(parts: Part[], dim: DimKey): Breakdown[] {
+  const counts = new Map<string, number>();
+  const values = new Map<string, number>();
+  for (const p of parts) {
+    const key = (p[dim] as string | null) || NONE_BUCKET;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    values.set(key, (values.get(key) ?? 0) + (Number(p.line_value) || 0));
+  }
+  const order =
+    dim === "status" || dim === "priority"
+      ? orderBuckets(dim, [...counts.keys()])
+      : [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  return order.map((label, i) => ({
+    label,
+    color: dimColor(dim, label, i),
+    count: counts.get(label) ?? 0,
+    value: values.get(label) ?? 0,
+  }));
+}
+
 export function summarize(parts: Part[], dim: DimKey, measure: Measure): Bar[] {
   const totals = new Map<string, number>();
   for (const p of parts) {

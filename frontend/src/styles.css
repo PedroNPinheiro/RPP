@@ -1200,3 +1200,25 @@ tr.line-row:hover .pill-select.sel-empty {
   color: var(--ink-3);
   margin: 18px 0 10px;
 }
+
+/* ---------- analytics explorer grid ---------- */
+.explore-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .explore-grid { grid-template-columns: 1fr; }
+}
+.breakdown-card { padding-bottom: 4px; }
+.breakdown-card .chart-head { padding: 14px 16px 4px; }
+.breakdown-card .table-scroll { max-height: 300px; }
+.bd-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: -1px;
+}
