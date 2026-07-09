@@ -268,59 +268,61 @@ body {
 /* ---------- stat tiles ---------- */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 235px));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
 }
 .tile {
-  background: var(--surface);
-  border: none;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  padding: 11px 15px 12px;
-}
-.tile-top {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--surface);
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 16px 18px;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
 }
+.tile-main { min-width: 0; }
 .tile-ic {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   flex-shrink: 0;
 }
-.tile-ic svg { width: 12px; height: 12px; }
-.t-blue { background: color-mix(in srgb, var(--accent) 11%, transparent); color: var(--accent); }
-.t-amber { background: color-mix(in srgb, #fab219 15%, transparent); color: var(--team-ink); }
+.tile-ic svg { width: 19px; height: 19px; }
+.t-blue { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.t-amber { background: color-mix(in srgb, #fab219 16%, transparent); color: var(--team-ink); }
 .t-red { background: var(--critical-wash); color: var(--critical); }
 .t-green { background: var(--good-wash); color: var(--good-text); }
 .t-neutral { background: color-mix(in srgb, var(--ink-3) 12%, transparent); color: var(--ink-2); }
 
 .tile-btn { cursor: pointer; }
 .tile-btn:hover {
-  box-shadow: 0 0 0 1.5px var(--accent), 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1.5px var(--accent), 0 8px 20px rgba(15, 23, 42, 0.1);
 }
 
 .tile .label {
   font-size: 12px;
   font-weight: 550;
-  color: var(--ink-2);
+  color: var(--ink-3);
+  margin-bottom: 3px;
 }
 .tile .value {
-  font-size: 21px;
+  font-size: 25px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink-1);
-  line-height: 1.2;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 .tile .value.crit { color: var(--critical); }
-.tile .context { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.tile .context { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
 
 /* ---------- toolbar ---------- */
 :root { --ctl-h: 36px; }

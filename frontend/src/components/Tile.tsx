@@ -19,12 +19,12 @@ export function Tile({ icon, tint, label, value, context, crit, onClick }: Props
       onClick={onClick}
       role={onClick ? "button" : undefined}
     >
-      <div className="tile-top">
-        <span className={`tile-ic t-${tint}`}>{icon}</span>
-        <span className="label">{label}</span>
+      <div className="tile-main">
+        <div className="label">{label}</div>
+        <div className={`value${crit ? " crit" : ""}`}>{value}</div>
+        {context && <div className="context">{context}</div>}
       </div>
-      <div className={`value${crit ? " crit" : ""}`}>{value}</div>
-      {context && <div className="context">{context}</div>}
+      <span className={`tile-ic t-${tint}`}>{icon}</span>
     </div>
   );
 }
