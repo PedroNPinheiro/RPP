@@ -115,6 +115,11 @@ export default function App() {
           <span>Activity</span>
           <span className="nav-chev">›</span>
         </NavLink>
+
+        <div className="sidebar-foot">
+          <span className="dot" />
+          <span>Live · Sage X3</span>
+        </div>
       </aside>
 
       <div className="main">

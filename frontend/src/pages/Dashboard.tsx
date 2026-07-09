@@ -4,6 +4,7 @@ import { isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
 import { PartDetail } from "../components/PartDetail";
 import { PartsTable } from "../components/PartsTable";
+import { DashboardSkeleton } from "../components/Skeleton";
 import { StatTiles } from "../components/StatTiles";
 import { exportCsv } from "../csv";
 
@@ -53,8 +54,6 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
     [parts],
   );
 
-  if (loading) return <div className="loading">Loading…</div>;
-
   return (
     <>
       <PageHeader
@@ -62,6 +61,10 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         sub={`${parts.length} line${parts.length === 1 ? "" : "s"} · live from Sage X3 · syncs every 15 min`}
       />
 
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
       <StatTiles parts={parts} onSelect={setView} />
 
       <div className="toolbar">
@@ -115,6 +118,8 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         onPatch={onPatch}
         onOpen={(p) => setSelectedId(p.id)}
       />
+        </>
+      )}
 
       {selected && (
         <PartDetail
