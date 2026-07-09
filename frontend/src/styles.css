@@ -609,7 +609,12 @@ td.date-cell {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.dstat.late { color: var(--critical); }
+.dstat.late {
+  color: var(--critical);
+  background: var(--critical-wash);
+  padding: 1px 8px;
+  border-radius: 999px;
+}
 .dstat.ok { color: var(--good-text); }
 .dstat.quiet { color: var(--ink-3); font-weight: 400; }
 

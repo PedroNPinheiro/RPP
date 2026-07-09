@@ -45,12 +45,14 @@ function displayValue(part: Part, col: Col): string {
   return String(v).trim();
 }
 
-/* per-line state: quiet colored text, icon + label (never color alone) */
+/* per-line state: quiet colored text, icon + label (never color alone).
+   Green ✓ is reserved for the team-closed state (Completo). "received" is a
+   neutral Sage-delivery note — the line is still Open until marked Completo. */
 function DelayCell({ part }: { part: Part }) {
-  const d = part.delay_days;
-  const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
-  if (received) return <span className="dstat ok">✓ received</span>;
   if (isCompleted(part)) return <span className="dstat ok">✓ done</span>;
+  const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
+  if (received) return <span className="dstat quiet">received</span>;
+  const d = part.delay_days;
   if (d === null || d === undefined) return null;
   if (d > 0) return <span className="dstat late">▲ {d}d late</span>;
   return <span className="dstat quiet">on time</span>;

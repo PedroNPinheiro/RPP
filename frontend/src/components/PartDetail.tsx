@@ -103,9 +103,9 @@ function coerce(field: string, raw: string | null): unknown {
 }
 
 function DelayChip({ part }: { part: Part }) {
-  const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
-  if (received) return <span className="chip ready">✓ received</span>;
   if (isCompleted(part)) return <span className="chip ready">✓ completed</span>;
+  const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
+  if (received) return <span className="chip neutral">received</span>;
   const d = part.delay_days;
   if (d !== null && d !== undefined && d > 0)
     return <span className="chip late">▲ {d}d late</span>;
