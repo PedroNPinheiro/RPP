@@ -7,6 +7,7 @@ import { IconChart, IconClock, IconGrid } from "./components/Icons";
 import { Activity } from "./pages/Activity";
 import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
+import { Login } from "./pages/Login";
 
 type Theme = "light" | "dark";
 type AuthUser = { email: string; name: string };
@@ -48,14 +49,12 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [user, setUser] = useState<AuthUser | null | "loading">("loading");
 
-  // gate the app: who am I? if unauthenticated, bounce to the server login
+  // gate the app: who am I? if unauthenticated, show the login screen
   useEffect(() => {
     fetch("/auth/me", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { email: string; name: string }) => setUser({ email: d.email, name: d.name }))
-      .catch(() => {
-        window.location.href = "/auth/login";
-      });
+      .catch(() => setUser(null));
   }, []);
 
   useEffect(() => {
@@ -105,7 +104,8 @@ export default function App() {
     reload: () => load(),
   };
 
-  if (user === "loading") return <div className="loading">Signing in…</div>;
+  if (user === "loading") return <div className="loading">Loading…</div>;
+  if (!user) return <Login error={new URLSearchParams(window.location.search).has("auth_error")} />;
 
   return (
     <AppCtx.Provider value={ctx}>
