@@ -5,7 +5,7 @@ import type { Part } from "../types";
 const STATUS_DOT: Record<string, string> = {
   "Por Iniciar": "st-todo",
   "Em Andamento": "st-prog",
-  "Pronto para Sair": "st-pend",
+  "Pronto para Sair": "st-ready",
   "Enviado/Já Saiu": "st-ship",
   "Problema/Falta de Informação": "st-crit",
   "Completo": "st-done",
@@ -46,6 +46,7 @@ export function EditableCell({ part, col, onPatch }: Props) {
     else if (col.key === "priority" && v.startsWith("P2")) tone = " sel-warn";
     else if (col.key === "status" && v === "Completo") tone = " sel-good";
     else if (col.key === "status" && v.startsWith("Problema")) tone = " sel-crit";
+    else if (col.key === "status" && v === "Pronto para Sair") tone = " sel-ready";
     else if (col.key === "status" && v === "Enviado/Já Saiu") tone = " sel-info";
     else if (col.key === "status" && (v === "Em Andamento" || v === "Em progresso")) tone = " sel-info";
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;

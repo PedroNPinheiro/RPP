@@ -535,6 +535,7 @@ td.date-cell {
 .st-pend { background: #fab219; }
 .st-done { background: var(--good); }
 .st-ship { background: var(--accent); }
+.st-ready { background: #8b5cf6; }
 .st-crit { background: var(--critical); }
 
 
@@ -672,6 +673,7 @@ tr.line-row:hover .cell-select.sel-empty {
 .sel-crit { color: var(--critical); font-weight: 600; }
 .sel-warn { color: var(--team-ink); font-weight: 600; }
 .sel-good { color: var(--good-text); font-weight: 600; }
+.sel-ready { color: #8b5cf6; font-weight: 600; }
 .sel-info { color: var(--accent); font-weight: 600; }
 
 input[type="checkbox"] { accent-color: var(--accent); }
@@ -1076,6 +1078,7 @@ tr.line-row:hover .pill-select.sel-empty {
 .pill-select.sel-crit { color: var(--critical); font-weight: 600; }
 .pill-select.sel-warn { color: var(--team-ink); font-weight: 600; }
 .pill-select.sel-good { color: var(--good-text); font-weight: 600; }
+.sel-ready { color: #8b5cf6; font-weight: 600; }
 .pill-select.sel-info { color: var(--accent); font-weight: 600; }
 .pill-select .pill-select-input option { color: var(--ink-1); background: var(--surface); }
 
@@ -1234,5 +1237,6 @@ tr.row-prog td { background: color-mix(in srgb, #fab219 14%, var(--surface)); }
 tr.row-crit td { background: color-mix(in srgb, var(--critical) 13%, var(--surface)); }
 tr.row-done td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
 tr.row-comp td { background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
+tr.row-ready td { background: color-mix(in srgb, #8b5cf6 12%, var(--surface)); }
 tr.line-row:hover td { background: var(--hover-wash); }
 tr.line-row.selected td { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }

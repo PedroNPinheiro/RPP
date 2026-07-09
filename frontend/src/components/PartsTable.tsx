@@ -8,6 +8,7 @@ import { EditableCell } from "./EditableCell";
 /* row background wash by status (like the source sheet) */
 const STATUS_ROW: Record<string, string> = {
   "Em Andamento": "row-prog",                 // yellow
+  "Pronto para Sair": "row-ready",            // violet
   "Problema/Falta de Informação": "row-crit", // red
   "Enviado/Já Saiu": "row-done",              // blue
   Completo: "row-comp",                       // green

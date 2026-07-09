@@ -16,7 +16,7 @@ export const STATUS_ORDER = [
 export const STATUS_COLORS: Record<string, string> = {
   "Por Iniciar": "#64748b",
   "Em Andamento": "#2a78d6",
-  "Pronto para Sair": "#eda100",
+  "Pronto para Sair": "#8b5cf6",
   "Enviado/Já Saiu": "#0ca30c",
   "Problema/Falta de Informação": "#d03b3b",
   "Completo": "#0ca30c",
