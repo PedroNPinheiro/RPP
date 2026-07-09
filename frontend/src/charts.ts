@@ -11,6 +11,7 @@ export const STATUS_ORDER = [
   "Pronto para Sair",
   "Enviado/Já Saiu",
   "Problema/Falta de Informação",
+  "Completo",
 ];
 export const STATUS_COLORS: Record<string, string> = {
   "Por Iniciar": "#64748b",
@@ -18,11 +19,11 @@ export const STATUS_COLORS: Record<string, string> = {
   "Pronto para Sair": "#eda100",
   "Enviado/Já Saiu": "#0ca30c",
   "Problema/Falta de Informação": "#d03b3b",
+  "Completo": "#0ca30c",
   // legacy values still color correctly
   "Por começar": "#64748b",
   "Em progresso": "#2a78d6",
   Pendente: "#eda100",
-  Completo: "#0ca30c",
 };
 
 export const PRIORITY_ORDER = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];

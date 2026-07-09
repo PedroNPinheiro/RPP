@@ -10,9 +10,9 @@ const STATUS_ROW: Record<string, string> = {
   "Em Andamento": "row-prog",                 // yellow
   "Problema/Falta de Informação": "row-crit", // red
   "Enviado/Já Saiu": "row-done",              // blue
-  // legacy values
+  Completo: "row-comp",                       // green
+  // legacy value
   "Em progresso": "row-prog",
-  Completo: "row-done",
 };
 
 /* when grouped, PO-level facts live in the group header, not on every line */

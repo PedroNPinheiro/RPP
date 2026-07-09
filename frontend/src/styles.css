@@ -534,6 +534,7 @@ td.date-cell {
 .st-prog { background: var(--accent); }
 .st-pend { background: #fab219; }
 .st-done { background: var(--good); }
+.st-ship { background: var(--accent); }
 .st-crit { background: var(--critical); }
 
 
@@ -1227,5 +1228,6 @@ tr.line-row:hover .pill-select.sel-empty {
 tr.row-prog td { background: color-mix(in srgb, #fab219 14%, var(--surface)); }
 tr.row-crit td { background: color-mix(in srgb, var(--critical) 13%, var(--surface)); }
 tr.row-done td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+tr.row-comp td { background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
 tr.line-row:hover td { background: var(--hover-wash); }
 tr.line-row.selected td { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }

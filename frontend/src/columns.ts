@@ -32,6 +32,7 @@ export const STATUS_OPTIONS = [
   "Pronto para Sair",
   "Enviado/Já Saiu",
   "Problema/Falta de Informação",
+  "Completo",
 ];
 
 // Line and Currency are merged into the PO and Value cells (rendered in
