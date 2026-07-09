@@ -50,8 +50,9 @@ export function EditableCell({ part, col, onPatch }: Props) {
     else if (col.key === "status" && v === "Enviado/Já Saiu") tone = " sel-info";
     else if (col.key === "status" && (v === "Em Andamento" || v === "Em progresso")) tone = " sel-info";
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
+    const variant = col.key === "priority" ? " pill-priority" : "";
     return (
-      <span className={`pill-select${tone}${v ? "" : " sel-empty"}`}>
+      <span className={`pill-select${variant}${tone}${v ? "" : " sel-empty"}`} title={v || undefined}>
         {dot && <span className={`status-dot ${dot}`} />}
         <select
           className="pill-select-input"

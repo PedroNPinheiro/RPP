@@ -610,12 +610,7 @@ td.date-cell {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.dstat.late {
-  color: var(--critical);
-  background: var(--critical-wash);
-  padding: 1px 8px;
-  border-radius: 999px;
-}
+.dstat.late { color: var(--critical); }
 .dstat.ok { color: var(--good-text); }
 .dstat.quiet { color: var(--ink-3); font-weight: 400; }
 
@@ -1036,51 +1031,65 @@ td.po-cell { font-variant-numeric: tabular-nums; }
 .panel-link:hover { text-decoration: underline; }
 
 /* ---------- inline pill selects (dot inside the pill) ---------- */
+/* base = crisp surface pill (Status uses this: white pill pops on tinted row) */
 .pill-select {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 210px;
+  padding: 3px 9px;
   border: 1px solid var(--ring);
   border-radius: 999px;
   background: var(--surface);
-  padding: 3px 6px 3px 11px;
-  max-width: 195px;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
 }
 .pill-select-input {
   border: none;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: inherit;
   appearance: none;
   cursor: pointer;
-  padding-right: 14px;
-  max-width: 160px;
+  max-width: 176px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding: 0;
 }
+.pill-select-input:focus { outline: none; }
+.pill-select .status-dot { flex-shrink: 0; }
+/* chevron only on hover, so at rest it reads as a badge not an input */
 .pill-select:hover .pill-select-input,
 .pill-select:focus-within .pill-select-input {
+  padding-right: 12px;
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238a94a6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 2px center;
+  background-position: right center;
 }
-.pill-select.sel-empty {
-  border-color: transparent;
-  background: transparent;
-}
-tr.line-row:hover .pill-select.sel-empty {
-  border-color: var(--ring);
+.pill-select.sel-empty { background: transparent; border-color: transparent; color: var(--ink-3); }
+tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background: var(--surface); }
+
+/* Status: tone colors the text only (the dot already carries the hue) */
+.pill-select.sel-crit { color: var(--critical); }
+.pill-select.sel-warn { color: var(--team-ink); }
+.pill-select.sel-good { color: var(--good-text); }
+.pill-select.sel-info { color: var(--accent); }
+.pill-select.sel-ready { color: #8b5cf6; }
+
+/* Priority: full colored badge (no dot) */
+.pill-priority { background: color-mix(in srgb, var(--ink-3) 11%, transparent); border-color: transparent; }
+.pill-priority.sel-crit { background: var(--critical-wash); border-color: color-mix(in srgb, var(--critical) 22%, transparent); }
+.pill-priority.sel-warn { background: color-mix(in srgb, #fab219 16%, transparent); border-color: color-mix(in srgb, #fab219 34%, transparent); }
+
+.pill-select .pill-select-input option {
+  color: var(--ink-1);
   background: var(--surface);
+  font-weight: 500;
 }
-.pill-select.sel-crit { color: var(--critical); font-weight: 600; }
-.pill-select.sel-warn { color: var(--team-ink); font-weight: 600; }
-.pill-select.sel-good { color: var(--good-text); font-weight: 600; }
-.sel-ready { color: #8b5cf6; font-weight: 600; }
-.pill-select.sel-info { color: var(--accent); font-weight: 600; }
-.pill-select .pill-select-input option { color: var(--ink-1); background: var(--surface); }
 
 /* ---------- attachments ---------- */
 .att-count {
