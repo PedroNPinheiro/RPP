@@ -1350,3 +1350,61 @@ input:focus-visible,
   border-bottom: 1px solid var(--grid);
 }
 .skel-row:last-child { border-bottom: none; }
+
+/* ---------- sidebar user chip ---------- */
+.side-spacer { flex: 1 1 auto; }
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 2px 2px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.user-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.user-name {
+  color: var(--side-ink-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-status {
+  color: var(--side-ink);
+  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.user-status .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--good);
+  animation: pulse-dot 2.2s ease-in-out infinite;
+}
+.user-signout {
+  margin-left: auto;
+  color: var(--side-ink);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 3px 7px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.user-signout:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }

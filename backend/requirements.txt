@@ -4,4 +4,7 @@ psycopg[binary]
 psycopg_pool
 pydantic-settings
 python-multipart
+authlib
+itsdangerous
+httpx
 # Entra ID auth (added when SSO is wired up): pyjwt[crypto], httpx

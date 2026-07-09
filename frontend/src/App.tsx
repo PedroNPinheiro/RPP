@@ -9,11 +9,17 @@ import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
 
 type Theme = "light" | "dark";
+type AuthUser = { email: string; name: string };
 
 function initialTheme(): Theme {
   const saved = localStorage.getItem("rpp-theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
 
 /* company logo card: drop the real logo at frontend/public/logo.png;
@@ -40,6 +46,17 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [user, setUser] = useState<AuthUser | null | "loading">("loading");
+
+  // gate the app: who am I? if unauthenticated, bounce to the server login
+  useEffect(() => {
+    fetch("/auth/me", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: { email: string; name: string }) => setUser({ email: d.email, name: d.name }))
+      .catch(() => {
+        window.location.href = "/auth/login";
+      });
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -88,6 +105,8 @@ export default function App() {
     reload: () => load(),
   };
 
+  if (user === "loading") return <div className="loading">Signing in…</div>;
+
   return (
     <AppCtx.Provider value={ctx}>
     <div className="shell">
@@ -116,10 +135,24 @@ export default function App() {
           <span className="nav-chev">›</span>
         </NavLink>
 
-        <div className="sidebar-foot">
-          <span className="dot" />
-          <span>Live · Sage X3</span>
-        </div>
+        <div className="side-spacer" />
+
+        {user && (
+          <div className="user-chip">
+            <span className="user-avatar">{initials(user.name)}</span>
+            <span className="user-meta">
+              <span className="user-name" title={user.email}>
+                {user.name}
+              </span>
+              <span className="user-status">
+                <span className="dot" /> Live · Sage X3
+              </span>
+            </span>
+            <a className="user-signout" href="/auth/logout" title="Sign out">
+              ⏻
+            </a>
+          </div>
+        )}
       </aside>
 
       <div className="main">

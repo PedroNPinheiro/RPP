@@ -18,18 +18,23 @@ class Settings(BaseSettings):
     # Where uploaded attachment files are stored (outside the repo).
     upload_dir: str = "/var/lib/rpp/uploads"
 
-    # Comma-separated allowed origins for the browser frontend.
-    cors_origins: str = "*"
+    # Public URL of the app (used for OAuth redirect + logout).
+    app_base_url: str = "https://rpp.cascointernal.com"
 
-    # Entra ID SSO — filled in when auth is wired up. While False, a dev user
-    # is assumed (do NOT deploy to prod with auth disabled).
+    # Entra ID SSO (Backend-For-Frontend / confidential client). While
+    # auth_enabled is False a dev user is assumed — do NOT ship prod that way.
     auth_enabled: bool = False
     entra_tenant_id: str = ""
     entra_client_id: str = ""
+    entra_client_secret: str = ""
+
+    # Signs the HttpOnly session cookie. Set a long random value in prod.
+    session_secret: str = "dev-insecure-change-me"
+    session_ttl: int = 60 * 60 * 8  # 8h
 
     @property
     def cors_list(self) -> list[str]:
-        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        return [self.app_base_url]
 
 
 settings = Settings()
