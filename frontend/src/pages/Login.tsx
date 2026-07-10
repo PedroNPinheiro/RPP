@@ -18,7 +18,7 @@ export function Login({ error }: { error?: boolean }) {
       <div className="login-card">
         <div className="login-logo">
           {hasLogo ? (
-            <img src="/logo.png" alt="CASCO" onError={() => setHasLogo(false)} />
+            <img src="/logo.jpg" alt="CASCO" onError={() => setHasLogo(false)} />
           ) : (
             <span className="brand-mark login-mark">RP</span>
           )}
