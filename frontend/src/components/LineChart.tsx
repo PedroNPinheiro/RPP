@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LineSeries } from "../charts";
 import { fmtDate } from "../format";
 
@@ -22,9 +22,23 @@ const PLOT_H = 210;
 export function LineChart({ title, dates, series, emptyText }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [fitW, setFitW] = useState(0);
 
   const n = dates.length;
-  const plotW = Math.max(n <= 1 ? 200 : (n - 1) * 60, 200);
+  const hasData = n > 0;
+
+  // stretch the plot to the card; overflow into horizontal scroll only
+  // once the daily points genuinely need more room
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setFitW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasData]);
+
+  const plotW = Math.max((n - 1) * 60, fitW - M.left - M.right - 2, 200);
   const width = M.left + plotW + M.right;
   const height = M.top + PLOT_H + M.bottom;
 
@@ -40,7 +54,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect || n === 0) return;
     const mx = e.clientX - rect.left;
-    const i = Math.round(((mx - M.left) / plotW) * (n - 1));
+    const i = n <= 1 ? 0 : Math.round(((mx - M.left) / plotW) * (n - 1));
     setHover(Math.max(0, Math.min(n - 1, i)));
   };
 
@@ -63,7 +77,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
           {emptyText ?? "No history yet — snapshots start today and build daily."}
         </div>
       ) : (
-        <div className="chart-scroll">
+        <div className="chart-scroll" ref={scrollRef}>
           <div className="chart-plot" style={{ width }}>
             <svg
               ref={svgRef}
@@ -123,6 +137,13 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                 return (
                   <g key={s.name}>
                     <path d={d} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                    {/* point markers so sparse history (esp. a single day) is
+                        visible; the surface ring keeps overlapping dots apart.
+                        hidden once the line is dense enough to carry itself */}
+                    {n <= 48 &&
+                      s.values.map((v, i) => (
+                        <circle key={i} cx={xOf(i)} cy={yOf(v)} r={3} fill={s.color} className="pt-marker" />
+                      ))}
                     {hover !== null && (
                       <circle cx={xOf(hover)} cy={yOf(s.values[hover])} r={3.5} fill={s.color} className="dot-ring" />
                     )}

@@ -1196,6 +1196,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 }
 .crosshair { stroke: var(--baseline); stroke-width: 1; stroke-dasharray: 3 3; }
 .dot-ring { stroke: var(--surface); stroke-width: 2; }
+.pt-marker { stroke: var(--surface); stroke-width: 1.5; }
 
 /* ---------- analytics filter/builder bars ---------- */
 .filter-bar, .builder {
