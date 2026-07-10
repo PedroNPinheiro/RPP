@@ -33,6 +33,18 @@ const FILTERS: { key: DimKey; label: string }[] = [
   { key: "priority", label: "Priority" },
 ];
 
+type RangeKey = "all" | "30d" | "90d" | "year" | "custom";
+
+const RANGES: { key: RangeKey; label: string }[] = [
+  { key: "all", label: "All time" },
+  { key: "30d", label: "Last 30 days" },
+  { key: "90d", label: "Last 90 days" },
+  { key: "year", label: "This year" },
+  { key: "custom", label: "Custom…" },
+];
+
+const isoDaysAgo = (days: number) => new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+
 export function Analytics({ parts, loading }: Props) {
   const [snap, setSnap] = useState<SnapshotResponse | null>(null);
   const [snapFailed, setSnapFailed] = useState(false);
@@ -40,6 +52,30 @@ export function Analytics({ parts, loading }: Props) {
   const [completion, setCompletion] = useState<Completion>("all");
   const [groupBy, setGroupBy] = useState<DimKey>("status");
   const [measure, setMeasure] = useState<Measure>("count");
+  const [range, setRange] = useState<RangeKey>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  // date window as ISO bounds; lines filter on po_date, history on snap day
+  const bounds = useMemo(() => {
+    switch (range) {
+      case "30d": return { min: isoDaysAgo(30), max: undefined };
+      case "90d": return { min: isoDaysAgo(90), max: undefined };
+      case "year": return { min: `${new Date().getFullYear()}-01-01`, max: undefined };
+      case "custom": return { min: dateFrom || undefined, max: dateTo || undefined };
+      default: return { min: undefined, max: undefined };
+    }
+  }, [range, dateFrom, dateTo]);
+
+  const inBounds = useMemo(() => {
+    const { min, max } = bounds;
+    return (iso: string | null | undefined) => {
+      if (!min && !max) return true;
+      if (!iso) return false; // an active range excludes lines with no date
+      const d = iso.slice(0, 10);
+      return (!min || d >= min) && (!max || d <= max);
+    };
+  }, [bounds]);
 
   useEffect(() => {
     getSnapshots()
@@ -58,13 +94,14 @@ export function Analytics({ parts, loading }: Props) {
     return parts.filter((p) => {
       if (completion === "open" && isCompleted(p)) return false;
       if (completion === "completed" && !isCompleted(p)) return false;
+      if (!inBounds(p.po_date)) return false;
       for (const { key } of FILTERS) {
         const want = filters[key];
         if (want && ((p[key] as string | null) || "") !== want) return false;
       }
       return true;
     });
-  }, [parts, filters, completion]);
+  }, [parts, filters, completion, inBounds]);
 
   const rows = useMemo(() => breakdown(filtered, groupBy), [filtered, groupBy]);
   const bars = useMemo(
@@ -72,8 +109,13 @@ export function Analytics({ parts, loading }: Props) {
     [rows, measure],
   );
 
-  const statusHist = useMemo(() => pivotSnapshots(snap?.rows ?? [], "status"), [snap]);
-  const priorityHist = useMemo(() => pivotSnapshots(snap?.rows ?? [], "priority"), [snap]);
+  // the date range also scopes which snapshot days the history shows
+  const histRows = useMemo(
+    () => (snap?.rows ?? []).filter((r) => inBounds(r.snap_date)),
+    [snap, inBounds],
+  );
+  const statusHist = useMemo(() => pivotSnapshots(histRows, "status"), [histRows]);
+  const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority"), [histRows]);
 
   // KPIs (respond to filters)
   const openCount = filtered.filter((p) => !isCompleted(p)).length;
@@ -87,7 +129,10 @@ export function Analytics({ parts, loading }: Props) {
   const measureTotal = rows.reduce((s, r) => s + (measure === "value" ? r.value : r.count), 0);
   const fmtVal = (n: number) => (measure === "value" ? fmtEUR(n, true) : String(Math.round(n)));
   const setFilter = (key: DimKey, v: string) => setFilters((f) => ({ ...f, [key]: v || undefined }));
-  const activeFilters = Object.values(filters).filter(Boolean).length + (completion !== "all" ? 1 : 0);
+  const activeFilters =
+    Object.values(filters).filter(Boolean).length +
+    (completion !== "all" ? 1 : 0) +
+    (bounds.min || bounds.max ? 1 : 0);
   const dimLabel = DIMENSIONS.find((d) => d.key === groupBy)?.label ?? "";
 
   if (loading) return <div className="loading">Loading…</div>;
@@ -116,6 +161,26 @@ export function Analytics({ parts, loading }: Props) {
             </button>
           ))}
         </div>
+        <label className="filter-field">
+          <span>PO date</span>
+          <select className="filter-select" value={range} onChange={(e) => setRange(e.target.value as RangeKey)}>
+            {RANGES.map((r) => (
+              <option key={r.key} value={r.key}>{r.label}</option>
+            ))}
+          </select>
+        </label>
+        {range === "custom" && (
+          <>
+            <label className="filter-field">
+              <span>From</span>
+              <input type="date" className="filter-select" value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} />
+            </label>
+            <label className="filter-field">
+              <span>To</span>
+              <input type="date" className="filter-select" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} />
+            </label>
+          </>
+        )}
         {FILTERS.map(({ key, label }) => (
           <label key={key} className="filter-field">
             <span>{label}</span>
@@ -128,7 +193,18 @@ export function Analytics({ parts, loading }: Props) {
           </label>
         ))}
         {activeFilters > 0 && (
-          <button className="btn" onClick={() => { setFilters({}); setCompletion("all"); }}>Clear</button>
+          <button
+            className="btn"
+            onClick={() => {
+              setFilters({});
+              setCompletion("all");
+              setRange("all");
+              setDateFrom("");
+              setDateTo("");
+            }}
+          >
+            Clear
+          </button>
         )}
       </div>
 
@@ -191,8 +267,10 @@ export function Analytics({ parts, loading }: Props) {
         </div>
       </div>
 
-      {/* history — all lines, accumulates daily */}
-      <div className="section-label">History (all lines · one point per day)</div>
+      {/* history — all lines, accumulates daily; date range scopes the days */}
+      <div className="section-label">
+        History (all lines · one point per day{bounds.min || bounds.max ? " · date-filtered" : ""})
+      </div>
       <div className="charts-grid">
         <LineChart
           title="Status History"
