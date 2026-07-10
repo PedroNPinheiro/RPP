@@ -23,14 +23,14 @@ function initials(name: string): string {
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
 
-/* company logo card: drop the real logo at frontend/public/logo.png;
-   falls back to the RP mark if the file isn't there */
+/* company brand: white knockout of the logo straight on the dark sidebar
+   (frontend/public/logo-dark.png); falls back to the RP mark if missing */
 function LogoCard() {
   const [hasLogo, setHasLogo] = useState(true);
   return (
-    <div className="logo-card">
+    <div className="side-brand">
       {hasLogo ? (
-        <img src="/logo.png" alt="CASCO Pet" onError={() => setHasLogo(false)} />
+        <img src="/logo-dark.png" alt="CASCO Pet" onError={() => setHasLogo(false)} />
       ) : (
         <div className="logo-fallback">
           <span className="brand-mark">RP</span>
