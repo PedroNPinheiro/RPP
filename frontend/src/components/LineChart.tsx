@@ -6,6 +6,7 @@ interface Props {
   title: string;
   dates: string[];
   series: LineSeries[];
+  emptyText?: string;
 }
 
 function niceMax(v: number): number {
@@ -18,7 +19,7 @@ function niceMax(v: number): number {
 const M = { top: 12, right: 16, bottom: 40, left: 40 };
 const PLOT_H = 210;
 
-export function LineChart({ title, dates, series }: Props) {
+export function LineChart({ title, dates, series, emptyText }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -59,7 +60,7 @@ export function LineChart({ title, dates, series }: Props) {
 
       {n === 0 ? (
         <div className="chart-empty">
-          No history yet — snapshots start today and build daily.
+          {emptyText ?? "No history yet — snapshots start today and build daily."}
         </div>
       ) : (
         <div className="chart-scroll">

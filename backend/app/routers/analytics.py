@@ -10,17 +10,13 @@ router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 NONE_BUCKET = "(no status)"
 
-# rebuild today's snapshot for both dimensions from the current parts
-REBUILD = """
-    DELETE FROM status_snapshot WHERE snap_date = CURRENT_DATE;
-
+# rebuild today's snapshot for both dimensions from the current parts;
+# one statement per execute — psycopg's parameterized queries use prepared
+# statements, which reject multiple commands in a single call
+SNAPSHOT_DIM = """
     INSERT INTO status_snapshot (snap_date, dimension, bucket, count)
-    SELECT CURRENT_DATE, 'status', COALESCE(NULLIF(status, ''), %(none)s), count(*)
-    FROM parts GROUP BY COALESCE(NULLIF(status, ''), %(none)s);
-
-    INSERT INTO status_snapshot (snap_date, dimension, bucket, count)
-    SELECT CURRENT_DATE, 'priority', COALESCE(NULLIF(priority, ''), %(none)s), count(*)
-    FROM parts GROUP BY COALESCE(NULLIF(priority, ''), %(none)s);
+    SELECT CURRENT_DATE, %(dim)s, COALESCE(NULLIF({col}, ''), %(none)s), count(*)
+    FROM parts GROUP BY COALESCE(NULLIF({col}, ''), %(none)s)
 """
 
 
@@ -29,7 +25,9 @@ def rebuild_today() -> None:
     Idempotent — also run hourly by the background task in main.py so
     history has no gaps on days nobody opens Analytics."""
     with pool.connection() as conn:
-        conn.execute(REBUILD, {"none": NONE_BUCKET})
+        conn.execute("DELETE FROM status_snapshot WHERE snap_date = CURRENT_DATE")
+        for dim in ("status", "priority"):  # dimension name == column name
+            conn.execute(SNAPSHOT_DIM.format(col=dim), {"dim": dim, "none": NONE_BUCKET})
         conn.commit()
 
 

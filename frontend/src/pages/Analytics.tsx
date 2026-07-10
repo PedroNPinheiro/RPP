@@ -35,13 +35,23 @@ const FILTERS: { key: DimKey; label: string }[] = [
 
 export function Analytics({ parts, loading }: Props) {
   const [snap, setSnap] = useState<SnapshotResponse | null>(null);
+  const [snapFailed, setSnapFailed] = useState(false);
   const [filters, setFilters] = useState<Partial<Record<DimKey, string>>>({});
   const [completion, setCompletion] = useState<Completion>("all");
   const [groupBy, setGroupBy] = useState<DimKey>("status");
   const [measure, setMeasure] = useState<Measure>("count");
 
   useEffect(() => {
-    getSnapshots().then(setSnap).catch(() => setSnap({ today: "", rows: [] }));
+    getSnapshots()
+      .then((s) => {
+        setSnap(s);
+        setSnapFailed(false);
+      })
+      .catch(() => {
+        // keep the page usable, but never dress a failure up as "no data"
+        setSnap({ today: "", rows: [] });
+        setSnapFailed(true);
+      });
   }, [parts]);
 
   const filtered = useMemo(() => {
@@ -184,8 +194,18 @@ export function Analytics({ parts, loading }: Props) {
       {/* history — all lines, accumulates daily */}
       <div className="section-label">History (all lines · one point per day)</div>
       <div className="charts-grid">
-        <LineChart title="Status History" dates={statusHist.dates} series={statusHist.series} />
-        <LineChart title="Priority History" dates={priorityHist.dates} series={priorityHist.series} />
+        <LineChart
+          title="Status History"
+          dates={statusHist.dates}
+          series={statusHist.series}
+          emptyText={snapFailed ? "Couldn't load history — check the backend log." : undefined}
+        />
+        <LineChart
+          title="Priority History"
+          dates={priorityHist.dates}
+          series={priorityHist.series}
+          emptyText={snapFailed ? "Couldn't load history — check the backend log." : undefined}
+        />
       </div>
     </>
   );
