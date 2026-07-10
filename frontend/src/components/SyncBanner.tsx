@@ -15,8 +15,10 @@ interface Props {
 
 export function SyncBanner({ sync, onRefresh }: Props) {
   const failed = sync?.ok === false;
+  // fragment, not a wrapper div: the chip and button sit directly in
+  // .page-actions so every header control shares the same flex gap
   return (
-    <div className="header-actions">
+    <>
       <span className={`sync-chip${failed ? " bad" : ""}`}>
         <span className="dot" />
         {failed ? (
@@ -27,9 +29,9 @@ export function SyncBanner({ sync, onRefresh }: Props) {
           </>
         )}
       </span>
-      <button className="btn" onClick={onRefresh}>
+      <button className="btn pill" onClick={onRefresh}>
         Reload
       </button>
-    </div>
+    </>
   );
 }
