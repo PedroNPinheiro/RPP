@@ -8,7 +8,7 @@ from ..db import pool
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
-NONE_BUCKET = "(sem estado)"
+NONE_BUCKET = "(no status)"
 
 # rebuild today's snapshot for both dimensions from the current parts
 REBUILD = """
