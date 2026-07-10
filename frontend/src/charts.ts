@@ -1,6 +1,8 @@
 import type { Part } from "./types";
 
-export const NONE_BUCKET = "(sem estado)";
+/* must match NONE_BUCKET in backend/app/routers/analytics.py so live
+   charts and snapshot history land in the same bucket */
+export const NONE_BUCKET = "(no status)";
 
 /* Status/priority colors match the app's status dots so the whole product
    speaks one visual language. Every chart also carries a legend + table,
