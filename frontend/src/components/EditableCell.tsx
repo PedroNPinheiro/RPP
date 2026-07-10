@@ -11,10 +11,6 @@ const STATUS_DOT: Record<string, string> = {
   "Enviado/Já Saiu": "st-ship",
   "Problema/Falta de Informação": "st-crit",
   Completo: "st-done",
-  // legacy values
-  "Por começar": "st-todo",
-  "Em progresso": "st-prog",
-  Pendente: "st-pend",
 };
 
 interface Props {

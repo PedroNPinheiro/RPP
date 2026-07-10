@@ -184,8 +184,8 @@ export function Analytics({ parts, loading }: Props) {
       {/* history — all lines, accumulates daily */}
       <div className="section-label">History (all lines · one point per day)</div>
       <div className="charts-grid">
-        <LineChart title="Histórico Status" dates={statusHist.dates} series={statusHist.series} />
-        <LineChart title="Histórico Prioridades" dates={priorityHist.dates} series={priorityHist.series} />
+        <LineChart title="Status History" dates={statusHist.dates} series={statusHist.series} />
+        <LineChart title="Priority History" dates={priorityHist.dates} series={priorityHist.series} />
       </div>
     </>
   );

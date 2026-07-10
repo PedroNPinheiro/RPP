@@ -559,7 +559,6 @@ td.date-cell {
 }
 .st-todo { background: var(--ink-3); }
 .st-prog { background: var(--accent); }
-.st-pend { background: #fab219; }
 .st-done { background: var(--good); }
 .st-ship { background: var(--accent); }
 .st-ready { background: #8b5cf6; }
