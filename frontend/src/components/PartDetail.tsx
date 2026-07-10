@@ -6,6 +6,7 @@ import {
   getAudit,
   uploadAttachment,
 } from "../api";
+import { useApp } from "../AppCtx";
 import { colByKey, DETAIL_GROUPS, FIELD_LABELS, type Col } from "../columns";
 import { fmtDate, fmtDateTime } from "../format";
 import { isCompleted } from "../logic";
@@ -21,12 +22,30 @@ function Field({
   col: Col;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
 }) {
+  const { canEdit } = useApp();
   const value = part[col.key];
   const commit = (next: unknown) => {
     if (next !== (value ?? null)) {
       onPatch(part.id, { [col.key]: next } as Partial<Part>);
     }
   };
+
+  if (!canEdit) {
+    const shown =
+      col.type === "bool"
+        ? value
+          ? "Yes"
+          : "—"
+        : col.type === "date"
+          ? fmtDate(value) || "—"
+          : ((value as string) || "—");
+    return (
+      <div className={`f-field${col.key === "notes" ? " f-wide" : ""}`}>
+        <label className="f-label">{col.label}</label>
+        <div className="f-ro">{shown}</div>
+      </div>
+    );
+  }
 
   if (col.type === "bool") {
     return (
@@ -119,6 +138,7 @@ interface Props {
 }
 
 export function PartDetail({ part, onClose, onPatch }: Props) {
+  const { canEdit } = useApp();
   const [entries, setEntries] = useState<AuditEntry[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -278,20 +298,24 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
           <section className="f-section">
             <div className="att-head">
               <h4>Attachments{files ? ` (${files.length})` : ""}</h4>
-              <button
-                className="btn att-add"
-                disabled={uploading}
-                onClick={() => fileInput.current?.click()}
-              >
-                {uploading ? "Uploading…" : "+ Add file"}
-              </button>
-              <input
-                ref={fileInput}
-                type="file"
-                multiple
-                hidden
-                onChange={(e) => onPickFiles(e.target.files)}
-              />
+              {canEdit && (
+                <>
+                  <button
+                    className="btn att-add"
+                    disabled={uploading}
+                    onClick={() => fileInput.current?.click()}
+                  >
+                    {uploading ? "Uploading…" : "+ Add file"}
+                  </button>
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    multiple
+                    hidden
+                    onChange={(e) => onPickFiles(e.target.files)}
+                  />
+                </>
+              )}
             </div>
             {fileError && <div className="error">⚠ {fileError}</div>}
             {files && files.length === 0 && (
@@ -321,13 +345,15 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
                 >
                   ↓
                 </a>
-                <button
-                  className="att-del"
-                  title="Delete attachment"
-                  onClick={() => removeFile(a)}
-                >
-                  ✕
-                </button>
+                {canEdit && (
+                  <button
+                    className="att-del"
+                    title="Delete attachment"
+                    onClick={() => removeFile(a)}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             ))}
           </section>
@@ -350,14 +376,16 @@ export function PartDetail({ part, onClose, onPatch }: Props) {
                 <div className="audit-meta">
                   <span className="audit-when">{fmtDateTime(e.changed_at)}</span>
                   <span className="audit-who">{e.changed_by}</span>
-                  <button
-                    className="audit-restore"
-                    disabled={busy}
-                    title={`Set ${FIELD_LABELS[e.field] ?? e.field} back to "${e.old_value ?? "—"}"`}
-                    onClick={() => restore(e)}
-                  >
-                    ↩ restore
-                  </button>
+                  {canEdit && (
+                    <button
+                      className="audit-restore"
+                      disabled={busy}
+                      title={`Set ${FIELD_LABELS[e.field] ?? e.field} back to "${e.old_value ?? "—"}"`}
+                      onClick={() => restore(e)}
+                    >
+                      ↩ restore
+                    </button>
+                  )}
                 </div>
                 <div className="audit-change">
                   <span className="audit-field">{FIELD_LABELS[e.field] ?? e.field}</span>

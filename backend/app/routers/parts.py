@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg.rows import dict_row
 
-from ..auth import get_current_user
+from ..auth import get_current_user, require_editor
 from ..db import pool
 from ..schemas import AuditEntry, Part, PartUpdate
 
@@ -25,7 +25,7 @@ def _s(v) -> str | None:
 
 
 @router.patch("/{part_id}", response_model=Part)
-def update_part(part_id: int, patch: PartUpdate, user: dict = Depends(get_current_user)):
+def update_part(part_id: int, patch: PartUpdate, user: dict = Depends(require_editor)):
     # Only fields the client actually sent; keys are constrained to PartUpdate's
     # whitelist, so the composed column list can never include a Sage column.
     fields = patch.model_dump(exclude_unset=True)

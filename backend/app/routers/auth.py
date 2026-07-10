@@ -4,7 +4,7 @@ from authlib.integrations.starlette_client import OAuthError
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from ..auth import oauth
+from ..auth import oauth, role_from_claims
 from ..config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -32,6 +32,7 @@ async def callback(request: Request):
     request.session["user"] = {
         "email": email,
         "name": claims.get("name") or email,
+        "role": role_from_claims(claims),
         "exp": int(time.time()) + settings.session_ttl,
     }
     return RedirectResponse(url="/")
@@ -40,11 +41,16 @@ async def callback(request: Request):
 @router.get("/me")
 async def me(request: Request):
     if not settings.auth_enabled:
-        return {"authenticated": True, "email": "dev@local", "name": "Dev User"}
+        return {"authenticated": True, "email": "dev@local", "name": "Dev User", "role": "editor"}
     user = request.session.get("user")
     if not user or user.get("exp", 0) < time.time():
         return JSONResponse({"authenticated": False}, status_code=401)
-    return {"authenticated": True, "email": user["email"], "name": user["name"]}
+    return {
+        "authenticated": True,
+        "email": user["email"],
+        "name": user["name"],
+        "role": user.get("role", "editor"),
+    }
 
 
 @router.get("/logout")

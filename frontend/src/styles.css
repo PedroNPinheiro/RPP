@@ -1504,3 +1504,40 @@ input:focus-visible,
   background: var(--good);
   animation: pulse-dot 2.2s ease-in-out infinite;
 }
+
+/* ---------- read-only (viewer) rendering ---------- */
+.cell-ro {
+  color: var(--ink-1);
+  font-size: 13px;
+  padding: 0 2px;
+}
+.pill-select.ro { cursor: default; }
+.pill-select.ro .pill-ro-text {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 176px;
+}
+.f-ro {
+  padding: 7px 11px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ink-3) 8%, transparent);
+  color: var(--ink-1);
+  font-size: 13px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--side-ink-strong);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}

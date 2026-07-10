@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from psycopg.rows import dict_row
 
-from ..auth import get_current_user
+from ..auth import get_current_user, require_editor
 from ..config import settings
 from ..db import pool
 from ..schemas import Attachment
@@ -35,7 +35,7 @@ def list_attachments(part_id: int, user: dict = Depends(get_current_user)):
 
 @router.post("/api/parts/{part_id}/attachments", response_model=Attachment)
 async def upload_attachment(
-    part_id: int, file: UploadFile, user: dict = Depends(get_current_user)
+    part_id: int, file: UploadFile, user: dict = Depends(require_editor)
 ):
     updir = Path(settings.upload_dir)
     updir.mkdir(parents=True, exist_ok=True)
@@ -108,7 +108,7 @@ def download_attachment(
 
 
 @router.delete("/api/attachments/{attachment_id}", status_code=204)
-def delete_attachment(attachment_id: int, user: dict = Depends(get_current_user)):
+def delete_attachment(attachment_id: int, user: dict = Depends(require_editor)):
     with pool.connection() as conn:
         conn.row_factory = dict_row
         row = conn.execute(

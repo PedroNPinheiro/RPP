@@ -10,7 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 
 type Theme = "light" | "dark";
-type AuthUser = { email: string; name: string };
+type AuthUser = { email: string; name: string; role: "editor" | "viewer" };
 
 function initialTheme(): Theme {
   const saved = localStorage.getItem("rpp-theme");
@@ -53,7 +53,9 @@ export default function App() {
   useEffect(() => {
     fetch("/auth/me", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((d: { email: string; name: string }) => setUser({ email: d.email, name: d.name }))
+      .then((d: { email: string; name: string; role?: string }) =>
+        setUser({ email: d.email, name: d.name, role: d.role === "viewer" ? "viewer" : "editor" }),
+      )
       .catch(() => setUser(null));
   }, []);
 
@@ -97,11 +99,13 @@ export default function App() {
     }
   }, []);
 
+  const canEdit = typeof user === "object" && user !== null ? user.role === "editor" : true;
   const ctx = {
     theme,
     toggleTheme: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
     sync,
     reload: () => load(),
+    canEdit,
   };
 
   if (user === "loading") return <div className="loading">Loading…</div>;
@@ -145,7 +149,13 @@ export default function App() {
                 {user.name}
               </span>
               <span className="user-status">
-                <span className="dot" /> Live · Sage X3
+                {user.role === "viewer" ? (
+                  <span className="role-tag">Read-only</span>
+                ) : (
+                  <>
+                    <span className="dot" /> Live · Sage X3
+                  </>
+                )}
               </span>
             </span>
             <a className="user-signout" href="/auth/logout" title="Sign out">

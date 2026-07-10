@@ -1,4 +1,6 @@
+import { useApp } from "../AppCtx";
 import type { Col } from "../columns";
+import { fmtDate } from "../format";
 import type { Part } from "../types";
 
 /* status → dot color (color always beside the status text, never alone) */
@@ -8,11 +10,11 @@ const STATUS_DOT: Record<string, string> = {
   "Pronto para Sair": "st-ready",
   "Enviado/Já Saiu": "st-ship",
   "Problema/Falta de Informação": "st-crit",
-  "Completo": "st-done",
+  Completo: "st-done",
   // legacy values
   "Por começar": "st-todo",
   "Em progresso": "st-prog",
-  "Pendente": "st-pend",
+  Pendente: "st-pend",
 };
 
 interface Props {
@@ -21,36 +23,38 @@ interface Props {
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
 }
 
-// Inline editor for a team column. Text/date commit on blur (only if changed);
-// select and checkbox commit immediately.
-export function EditableCell({ part, col, onPatch }: Props) {
-  const value = part[col.key];
+function statusTone(colKey: string, v: string): string {
+  if (colKey === "priority" && v.startsWith("P1")) return " sel-crit";
+  if (colKey === "priority" && v.startsWith("P2")) return " sel-warn";
+  if (colKey === "status" && v === "Completo") return " sel-good";
+  if (colKey === "status" && v.startsWith("Problema")) return " sel-crit";
+  if (colKey === "status" && v === "Pronto para Sair") return " sel-ready";
+  if (colKey === "status" && v === "Enviado/Já Saiu") return " sel-info";
+  if (colKey === "status" && (v === "Em Andamento" || v === "Em progresso")) return " sel-info";
+  return "";
+}
 
-  if (col.type === "bool") {
-    return (
-      <input
-        type="checkbox"
-        checked={Boolean(value)}
-        onChange={(e) =>
-          onPatch(part.id, { [col.key]: e.target.checked } as Partial<Part>)
-        }
-      />
-    );
-  }
+// Inline editor for a team column. Text/date commit on blur (only if changed);
+// select and checkbox commit immediately. Renders read-only for viewers.
+export function EditableCell({ part, col, onPatch }: Props) {
+  const { canEdit } = useApp();
+  const value = part[col.key];
 
   if (col.type === "select") {
     const v = (value ?? "") as string;
-    // meaningful color on high-signal values (paired with the text itself)
-    let tone = "";
-    if (col.key === "priority" && v.startsWith("P1")) tone = " sel-crit";
-    else if (col.key === "priority" && v.startsWith("P2")) tone = " sel-warn";
-    else if (col.key === "status" && v === "Completo") tone = " sel-good";
-    else if (col.key === "status" && v.startsWith("Problema")) tone = " sel-crit";
-    else if (col.key === "status" && v === "Pronto para Sair") tone = " sel-ready";
-    else if (col.key === "status" && v === "Enviado/Já Saiu") tone = " sel-info";
-    else if (col.key === "status" && (v === "Em Andamento" || v === "Em progresso")) tone = " sel-info";
+    const tone = statusTone(String(col.key), v);
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
     const variant = col.key === "priority" ? " pill-priority" : "";
+
+    if (!canEdit) {
+      if (!v) return <span className="cell-ro">—</span>;
+      return (
+        <span className={`pill-select ro${variant}${tone}`} title={v}>
+          {dot && <span className={`status-dot ${dot}`} />}
+          <span className="pill-ro-text">{v}</span>
+        </span>
+      );
+    }
     return (
       <span className={`pill-select${variant}${tone}${v ? "" : " sel-empty"}`} title={v || undefined}>
         {dot && <span className={`status-dot ${dot}`} />}
@@ -68,13 +72,29 @@ export function EditableCell({ part, col, onPatch }: Props) {
               {o}
             </option>
           ))}
-          {/* keep a legacy value visible even if it's not in the option list */}
           {value && !col.options?.includes(String(value)) && (
             <option value={String(value)}>{String(value)}</option>
           )}
         </select>
       </span>
     );
+  }
+
+  if (col.type === "bool") {
+    if (!canEdit) return <span className="cell-ro">{value ? "Yes" : "—"}</span>;
+    return (
+      <input
+        type="checkbox"
+        checked={Boolean(value)}
+        onChange={(e) => onPatch(part.id, { [col.key]: e.target.checked } as Partial<Part>)}
+      />
+    );
+  }
+
+  // text / date
+  if (!canEdit) {
+    const text = col.type === "date" ? fmtDate(value) : ((value ?? "") as string);
+    return <span className="cell-ro">{text || "—"}</span>;
   }
 
   const emptyDate = col.type === "date" && !value;

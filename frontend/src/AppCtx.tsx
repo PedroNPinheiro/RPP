@@ -6,6 +6,7 @@ export interface AppCtxValue {
   toggleTheme: () => void;
   sync: SyncStatus | null;
   reload: () => void;
+  canEdit: boolean;
 }
 
 export const AppCtx = createContext<AppCtxValue>({
@@ -13,6 +14,7 @@ export const AppCtx = createContext<AppCtxValue>({
   toggleTheme: () => {},
   sync: null,
   reload: () => {},
+  canEdit: true,
 });
 
 export const useApp = () => useContext(AppCtx);
