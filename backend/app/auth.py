@@ -46,7 +46,9 @@ def get_current_user(request: Request) -> dict:
 
 
 def require_editor(user: dict = Depends(get_current_user)) -> dict:
-    """Guard for write endpoints — viewers get 403."""
-    if user.get("role") != "editor":
+    """Guard for write endpoints — only an explicit 'viewer' is blocked.
+    A missing role (e.g. a session created before roles existed) is treated
+    as editor so nobody is locked out mid-rollout."""
+    if user.get("role", "editor") != "editor":
         raise HTTPException(status_code=403, detail="Your account has read-only access.")
     return user
