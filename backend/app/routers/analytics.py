@@ -24,13 +24,21 @@ REBUILD = """
 """
 
 
+def rebuild_today() -> None:
+    """Replace today's snapshot with the current parts distribution.
+    Idempotent — also run hourly by the background task in main.py so
+    history has no gaps on days nobody opens Analytics."""
+    with pool.connection() as conn:
+        conn.execute(REBUILD, {"none": NONE_BUCKET})
+        conn.commit()
+
+
 @router.get("/snapshots")
 def snapshots(user: dict = Depends(get_current_user)):
     """Ensure today's snapshot exists, then return the full daily history."""
+    rebuild_today()
     with pool.connection() as conn:
         conn.row_factory = dict_row
-        conn.execute(REBUILD, {"none": NONE_BUCKET})
-        conn.commit()
         rows = conn.execute(
             "SELECT snap_date, dimension, bucket, count "
             "FROM status_snapshot ORDER BY snap_date, dimension, bucket"

@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 import psycopg
@@ -9,6 +11,19 @@ from .config import settings
 from .db import pool
 from .routers import analytics, attachments, audit, auth, health, parts
 
+log = logging.getLogger("rpp")
+
+
+async def snapshot_loop():
+    """Rebuild today's analytics snapshot hourly so daily history has no
+    gaps even if nobody opens the Analytics page that day."""
+    while True:
+        try:
+            await asyncio.to_thread(analytics.rebuild_today)
+        except Exception:
+            log.exception("analytics snapshot rebuild failed")
+        await asyncio.sleep(3600)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,9 +31,11 @@ async def lifespan(app: FastAPI):
     # instead of a 30s PoolTimeout on the first request if creds/DB are wrong.
     psycopg.connect(settings.database_url, connect_timeout=5).close()
     pool.open()
+    snapshots = asyncio.create_task(snapshot_loop())
     try:
         yield
     finally:
+        snapshots.cancel()
         pool.close()
 
 
