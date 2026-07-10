@@ -102,19 +102,21 @@ body {
 
 .logo-card {
   background: #ffffff;
-  border-radius: 13px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 2px 2px 20px;
-  min-height: 56px;
-  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.4);
+  min-height: 72px;
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.06);
 }
 .logo-card img {
   max-width: 100%;
-  max-height: 56px;
+  max-height: 66px;
   object-fit: contain;
+  display: block;
 }
 .logo-fallback {
   display: flex;
