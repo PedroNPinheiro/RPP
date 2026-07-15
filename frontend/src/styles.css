@@ -548,17 +548,7 @@ td.ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.line-tag {
-  color: var(--ink-3);
-  font-size: 10px;
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ink-3) 12%, transparent);
-  font-variant-numeric: tabular-nums;
-}
 .line-cell { text-align: right; }
-td.line-cell .line-tag { margin-left: 0; }
 
 /* identifiers read as codes, not prose */
 td.code-cell {

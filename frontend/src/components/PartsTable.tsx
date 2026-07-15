@@ -103,16 +103,11 @@ function renderLine(
     >
       {cols.map((c) => {
         if (c.key === "poh_num") {
+          // Sage line numbers (1000, 2000…) are noise for the team — the
+          // drawer and CSV keep them for traceability
           return (
             <td key="poh_num" className={inGroup ? "line-cell" : "po-cell"}>
-              {inGroup ? (
-                <span className="line-tag">line {p.poh_line}</span>
-              ) : (
-                <>
-                  {p.poh_num}
-                  <span className="line-tag">·{p.poh_line}</span>
-                </>
-              )}
+              {inGroup ? null : p.poh_num}
             </td>
           );
         }
