@@ -11,8 +11,9 @@ export const STATUS_ORDER = [
   "Por Iniciar",
   "Em Andamento",
   "Pronto para Sair",
-  "Enviado/Já Saiu",
+  "Enviado/Já Saiu", // retired option; old lines/snapshots may still hold it
   "Problema/Falta de Informação",
+  "Cancelado",
   "Completo",
 ];
 export const STATUS_COLORS: Record<string, string> = {
@@ -21,6 +22,7 @@ export const STATUS_COLORS: Record<string, string> = {
   "Pronto para Sair": "#8b5cf6",
   "Enviado/Já Saiu": "#0ca30c",
   "Problema/Falta de Informação": "#d03b3b",
+  "Cancelado": "#475569",
   "Completo": "#0ca30c",
 };
 

@@ -30,8 +30,8 @@ export const STATUS_OPTIONS = [
   "Por Iniciar",
   "Em Andamento",
   "Pronto para Sair",
-  "Enviado/Já Saiu",
   "Problema/Falta de Informação",
+  "Cancelado",
   "Completo",
 ];
 

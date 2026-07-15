@@ -1,9 +1,9 @@
-import { isCompleted, isDelayed } from "../logic";
+import { isClosed, isDelayed } from "../logic";
 import type { Part } from "../types";
 import { IconAlert, IconBanknote, IconClock, IconLayers } from "./Icons";
 import { Tile } from "./Tile";
 
-type View = "open" | "delayed" | "completed" | "all";
+type View = "open" | "delayed" | "completed" | "cancelled" | "all";
 
 interface Props {
   parts: Part[];
@@ -21,7 +21,7 @@ function compactCurrency(total: number, currency: string): string {
 
 export function StatTiles({ parts, onSelect }: Props) {
   const delayed = parts.filter(isDelayed).length;
-  const openParts = parts.filter((p) => !isCompleted(p));
+  const openParts = parts.filter((p) => !isClosed(p));
   const currency = parts.find((p) => p.currency)?.currency ?? "EUR";
   const totalValue = openParts.reduce((s, p) => s + (Number(p.line_value) || 0), 0);
 
@@ -40,7 +40,7 @@ export function StatTiles({ parts, onSelect }: Props) {
         tint="amber"
         label="Open"
         value={openParts.length}
-        context="not yet completed"
+        context="not completed or cancelled"
         onClick={onSelect && (() => onSelect("open"))}
       />
       <Tile

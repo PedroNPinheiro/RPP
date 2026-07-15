@@ -8,8 +8,9 @@ const STATUS_DOT: Record<string, string> = {
   "Por Iniciar": "st-todo",
   "Em Andamento": "st-prog",
   "Pronto para Sair": "st-ready",
-  "Enviado/Já Saiu": "st-ship",
+  "Enviado/Já Saiu": "st-ship", // retired option; old lines keep it
   "Problema/Falta de Informação": "st-crit",
+  Cancelado: "st-cancel",
   Completo: "st-done",
 };
 
@@ -25,6 +26,7 @@ function statusTone(colKey: string, v: string): string {
   if (colKey === "status" && v === "Completo") return " sel-good";
   if (colKey === "status" && v.startsWith("Problema")) return " sel-crit";
   if (colKey === "status" && v === "Pronto para Sair") return " sel-ready";
+  if (colKey === "status" && v === "Cancelado") return " sel-off";
   if (colKey === "status" && v === "Enviado/Já Saiu") return " sel-info";
   if (colKey === "status" && (v === "Em Andamento" || v === "Em progresso")) return " sel-info";
   return "";

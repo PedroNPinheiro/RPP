@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { TABLE_COLUMNS, type Col } from "../columns";
 import { fmtDate } from "../format";
-import { isCompleted } from "../logic";
+import { isCancelled, isClosed, isCompleted } from "../logic";
 import type { Part } from "../types";
 import { EditableCell } from "./EditableCell";
 
@@ -10,7 +10,8 @@ const STATUS_ROW: Record<string, string> = {
   "Em Andamento": "row-prog",                 // yellow
   "Pronto para Sair": "row-ready",            // violet
   "Problema/Falta de Informação": "row-crit", // red
-  "Enviado/Já Saiu": "row-done",              // blue
+  "Enviado/Já Saiu": "row-done",              // blue (retired option; old lines keep it)
+  Cancelado: "row-cancel",                    // gray
   Completo: "row-comp",                       // green
 };
 
@@ -49,6 +50,7 @@ function displayValue(part: Part, col: Col): string {
    neutral Sage-delivery note — the line is still Open until marked Completo. */
 function DelayCell({ part }: { part: Part }) {
   if (isCompleted(part)) return <span className="dstat ok">✓ done</span>;
+  if (isCancelled(part)) return <span className="dstat quiet">✕ cancelled</span>;
   const received = Number(part.balance_qty) <= 0 && part.qty_ordered !== null;
   if (received) return <span className="dstat quiet">received</span>;
   const d = part.delay_days;
@@ -59,10 +61,15 @@ function DelayCell({ part }: { part: Part }) {
 
 /* PO-level state: one pill per group header */
 function GroupChip({ lines }: { lines: Part[] }) {
-  if (lines.every(isCompleted)) return <span className="chip ready">✓ completed</span>;
-  const worst = Math.max(
-    ...lines.filter((l) => !isCompleted(l)).map((l) => Number(l.delay_days) || 0),
-  );
+  const open = lines.filter((l) => !isClosed(l));
+  if (open.length === 0) {
+    return lines.some(isCompleted) ? (
+      <span className="chip ready">✓ completed</span>
+    ) : (
+      <span className="chip neutral">✕ cancelled</span>
+    );
+  }
+  const worst = Math.max(...open.map((l) => Number(l.delay_days) || 0));
   if (worst > 0) return <span className="chip late">▲ {worst}d late</span>;
   return <span className="chip neutral">on time</span>;
 }

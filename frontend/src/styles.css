@@ -564,6 +564,7 @@ td.date-cell {
 .st-done { background: var(--good); }
 .st-ship { background: var(--accent); }
 .st-ready { background: #8b5cf6; }
+.st-cancel { background: var(--ink-3); }
 .st-crit { background: var(--critical); }
 
 
@@ -698,6 +699,7 @@ tr.line-row:hover .cell-select.sel-empty {
 .sel-good { color: var(--good-text); font-weight: 600; }
 .sel-ready { color: #8b5cf6; font-weight: 600; }
 .sel-info { color: var(--accent); font-weight: 600; }
+.sel-off { color: var(--ink-3); font-weight: 600; }
 
 input[type="checkbox"] { accent-color: var(--accent); }
 
@@ -1119,6 +1121,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 .pill-select.sel-good { color: var(--good-text); }
 .pill-select.sel-info { color: var(--accent); }
 .pill-select.sel-ready { color: #8b5cf6; }
+.pill-select.sel-off { color: var(--ink-3); }
 
 /* Priority: full colored badge (no dot) */
 .pill-priority { background: color-mix(in srgb, var(--ink-3) 11%, transparent); border-color: transparent; }
@@ -1289,6 +1292,8 @@ tr.row-crit td { background: color-mix(in srgb, var(--critical) 13%, var(--surfa
 tr.row-done td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
 tr.row-comp td { background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
 tr.row-ready td { background: color-mix(in srgb, #8b5cf6 12%, var(--surface)); }
+tr.row-cancel td { background: color-mix(in srgb, var(--ink-3) 12%, var(--surface)); }
+tr.row-cancel td:not(.team) { color: var(--ink-3); }
 tr.line-row:hover td { background: var(--hover-wash); }
 tr.line-row.selected td { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
 

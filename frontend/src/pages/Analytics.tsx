@@ -15,7 +15,7 @@ import { IconAlert, IconBanknote, IconCheckCircle, IconClock, IconLayers } from 
 import { LineChart } from "../components/LineChart";
 import { PageHeader } from "../components/PageHeader";
 import { Tile } from "../components/Tile";
-import { isCompleted, isDelayed } from "../logic";
+import { isClosed, isCompleted, isDelayed } from "../logic";
 import type { Part } from "../types";
 
 interface Props {
@@ -92,7 +92,7 @@ export function Analytics({ parts, loading }: Props) {
 
   const filtered = useMemo(() => {
     return parts.filter((p) => {
-      if (completion === "open" && isCompleted(p)) return false;
+      if (completion === "open" && isClosed(p)) return false;
       if (completion === "completed" && !isCompleted(p)) return false;
       if (!inBounds(p.po_date)) return false;
       for (const { key } of FILTERS) {
@@ -118,12 +118,12 @@ export function Analytics({ parts, loading }: Props) {
   const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority"), [histRows]);
 
   // KPIs (respond to filters)
-  const openCount = filtered.filter((p) => !isCompleted(p)).length;
-  const completedCount = filtered.length - openCount;
+  const openCount = filtered.filter((p) => !isClosed(p)).length;
+  const completedCount = filtered.filter(isCompleted).length;
   const delayed = filtered.filter(isDelayed).length;
   const totalVal = filtered.reduce((s, p) => s + (Number(p.line_value) || 0), 0);
   const openVal = filtered
-    .filter((p) => !isCompleted(p))
+    .filter((p) => !isClosed(p))
     .reduce((s, p) => s + (Number(p.line_value) || 0), 0);
 
   const measureTotal = rows.reduce((s, r) => s + (measure === "value" ? r.value : r.count), 0);

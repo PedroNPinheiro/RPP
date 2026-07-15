@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Part } from "../types";
-import { isCompleted, isDelayed } from "../logic";
+import { isCancelled, isClosed, isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
 import { PartDetail } from "../components/PartDetail";
 import { PartsTable } from "../components/PartsTable";
@@ -8,7 +8,7 @@ import { DashboardSkeleton } from "../components/Skeleton";
 import { StatTiles } from "../components/StatTiles";
 import { exportCsv } from "../csv";
 
-type View = "open" | "delayed" | "completed" | "all";
+type View = "open" | "delayed" | "completed" | "cancelled" | "all";
 
 interface Props {
   parts: Part[];
@@ -30,9 +30,10 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
 
   const visible = useMemo(() => {
     let rows = parts;
-    if (view === "open") rows = rows.filter((p) => !isCompleted(p));
+    if (view === "open") rows = rows.filter((p) => !isClosed(p));
     if (view === "delayed") rows = rows.filter(isDelayed);
     if (view === "completed") rows = rows.filter(isCompleted);
+    if (view === "cancelled") rows = rows.filter(isCancelled);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter((p) =>
@@ -46,9 +47,10 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
 
   const counts = useMemo(
     () => ({
-      open: parts.filter((p) => !isCompleted(p)).length,
+      open: parts.filter((p) => !isClosed(p)).length,
       delayed: parts.filter(isDelayed).length,
       completed: parts.filter(isCompleted).length,
+      cancelled: parts.filter(isCancelled).length,
       all: parts.length,
     }),
     [parts],
@@ -80,6 +82,12 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
             onClick={() => setView("completed")}
           >
             Completed <span className="count">{counts.completed}</span>
+          </button>
+          <button
+            className={view === "cancelled" ? "on" : ""}
+            onClick={() => setView("cancelled")}
+          >
+            Cancelled <span className="count">{counts.cancelled}</span>
           </button>
           <button className={view === "all" ? "on" : ""} onClick={() => setView("all")}>
             All <span className="count">{counts.all}</span>
