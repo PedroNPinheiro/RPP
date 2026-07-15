@@ -15,8 +15,9 @@ const STATUS_ROW: Record<string, string> = {
   Completo: "row-comp",                       // green
 };
 
-/* when grouped, PO-level facts live in the group header, not on every line */
-const GROUP_HIDDEN = new Set<string>(["supplier_name", "po_date"]);
+/* when grouped, PO-level facts live in the group header, not on every line
+   (supplier shows only in group headers and the drawer — not a line column) */
+const GROUP_HIDDEN = new Set<string>(["po_date"]);
 
 /* ---- formatting ---- */
 function fmtNumber(v: unknown): string {

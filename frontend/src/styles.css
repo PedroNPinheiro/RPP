@@ -227,7 +227,7 @@ body {
 
 .content {
   padding: 28px 40px 48px;
-  max-width: 1680px;
+  max-width: 1880px;
   width: 100%;
   margin: 0 auto;
 }
@@ -1125,7 +1125,7 @@ td.po-cell { font-variant-numeric: tabular-nums; }
   cursor: pointer;
   /* a select's closed face sizes to its WIDEST option — cap it so the
      status column doesn't reserve room for the longest status name */
-  width: 118px;
+  width: 104px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1566,7 +1566,7 @@ input:focus-visible,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 118px;
+  max-width: 104px;
 }
 .f-ro {
   padding: 7px 11px;
