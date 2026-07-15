@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     session_secret: str = "dev-insecure-change-me"
     session_ttl: int = 60 * 60 * 8  # 8h
 
+    # Email notifications (Office 365 SMTP). Notifications are disabled
+    # until smtp_user, smtp_password and notify_drawings_to are all set.
+    smtp_host: str = "smtp.office365.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    # Comma-separated recipient list for the "drawings required" alert.
+    notify_drawings_to: str = ""
+
     @property
     def cors_list(self) -> list[str]:
         return [self.app_base_url]

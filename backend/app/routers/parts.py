@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from psycopg.rows import dict_row
 
 from ..auth import get_current_user, require_editor
 from ..db import pool
+from ..notify import drawings_notify_enabled, send_drawings_notification
 from ..schemas import AuditEntry, BulkUpdate, Part, PartUpdate
 
 router = APIRouter(prefix="/api/parts", tags=["parts"])
@@ -25,7 +26,7 @@ def _s(v) -> str | None:
 
 
 @router.post("/bulk", response_model=list[Part])
-def bulk_update(patch: BulkUpdate, user: dict = Depends(require_editor)):
+def bulk_update(patch: BulkUpdate, tasks: BackgroundTasks, user: dict = Depends(require_editor)):
     """Apply the same team-field values to many lines in one transaction.
     Audits per line, exactly like single edits. POST (not PATCH) so the
     path can't be shadowed by the /{part_id} route."""
@@ -70,15 +71,23 @@ def bulk_update(patch: BulkUpdate, user: dict = Depends(require_editor)):
                 )
         conn.commit()
 
-        return conn.execute(
+        result = conn.execute(
             "SELECT * FROM parts_dashboard WHERE id = ANY(%s) "
             "ORDER BY poh_num, poh_line",
             (patch.ids,),
         ).fetchall()
 
+    # 'Drawings?' just flipped to Yes on these lines -> notify (post-response)
+    if fields.get("drawings_required") is True and drawings_notify_enabled():
+        ticked_ids = {r["id"] for r in current_rows if not r["drawings_required"]}
+        ticked = [dict(r) for r in result if r["id"] in ticked_ids]
+        if ticked:
+            tasks.add_task(send_drawings_notification, ticked, user["email"])
+    return result
+
 
 @router.patch("/{part_id}", response_model=Part)
-def update_part(part_id: int, patch: PartUpdate, user: dict = Depends(require_editor)):
+def update_part(part_id: int, patch: PartUpdate, tasks: BackgroundTasks, user: dict = Depends(require_editor)):
     # Only fields the client actually sent; keys are constrained to PartUpdate's
     # whitelist, so the composed column list can never include a Sage column.
     fields = patch.model_dump(exclude_unset=True)
@@ -123,9 +132,17 @@ def update_part(part_id: int, patch: PartUpdate, user: dict = Depends(require_ed
         conn.commit()
 
         # Re-read from the view so computed columns come back too.
-        return conn.execute(
+        final = conn.execute(
             "SELECT * FROM parts_dashboard WHERE id = %s", (part_id,)
         ).fetchone()
+
+    if (
+        drawings_notify_enabled()
+        and any(col == "drawings_required" and bool(new) and not bool(old)
+                for col, old, new in changes)
+    ):
+        tasks.add_task(send_drawings_notification, [dict(final)], user["email"])
+    return final
 
 
 @router.get("/{part_id}/audit", response_model=list[AuditEntry])
