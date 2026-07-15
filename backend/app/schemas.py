@@ -39,6 +39,7 @@ class Part(BaseModel):
     status: Optional[str] = None
     priority: Optional[str] = None
     category: Optional[str] = None
+    area: Optional[str] = None
     tank: Optional[str] = None
     estimated_date: Optional[date] = None
     required_ship: Optional[date] = None
@@ -79,6 +80,7 @@ class PartUpdate(BaseModel):
     status: Optional[str] = None
     priority: Optional[str] = None
     category: Optional[str] = None
+    area: Optional[str] = None
     tank: Optional[str] = None
     estimated_date: Optional[date] = None
     required_ship: Optional[date] = None

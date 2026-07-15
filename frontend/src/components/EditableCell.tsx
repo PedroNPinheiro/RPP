@@ -43,7 +43,10 @@ export function EditableCell({ part, col, onPatch }: Props) {
     const tone = statusTone(String(col.key), v);
     const dot = col.key === "status" ? STATUS_DOT[v] : undefined;
     const variant =
-      col.key === "priority" ? " pill-priority" : col.key === "category" ? " pill-category" : "";
+      col.key === "priority" ? " pill-priority"
+      : col.key === "category" ? " pill-category"
+      : col.key === "area" ? " pill-area"
+      : "";
 
     if (!canEdit) {
       if (!v) return <span className="cell-ro">—</span>;

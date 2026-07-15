@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useApp } from "../AppCtx";
-import { CATEGORY_OPTIONS, COLUMNS } from "../columns";
+import { AREA_OPTIONS, CATEGORY_OPTIONS, COLUMNS } from "../columns";
 import type { Part } from "../types";
 import { isCancelled, isClosed, isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
@@ -28,6 +28,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [area, setArea] = useState("");
   const [grouped, setGrouped] = useState(true);
   const [groupOrder, setGroupOrder] = useState<GroupOrder>("po");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -80,6 +81,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
     if (view === "completed") rows = rows.filter(isCompleted);
     if (view === "cancelled") rows = rows.filter(isCancelled);
     if (category) rows = rows.filter((p) => (p.category || "") === category);
+    if (area) rows = rows.filter((p) => (p.area || "") === area);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter((p) =>
@@ -89,7 +91,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
       );
     }
     return rows;
-  }, [parts, view, search, category]);
+  }, [parts, view, search, category, area]);
 
   const counts = useMemo(
     () => ({
@@ -140,6 +142,17 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
           </button>
         </div>
         <div className="toolbar-right">
+          <select
+            className="filter-select"
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            title="Filter by área"
+          >
+            <option value="">All áreas</option>
+            {AREA_OPTIONS.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
           <select
             className="filter-select"
             value={category}

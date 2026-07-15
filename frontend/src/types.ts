@@ -34,6 +34,7 @@ export interface Part {
   status: string | null;
   priority: string | null;
   category: string | null;
+  area: string | null;
   tank: string | null;
   estimated_date: string | null;
   required_ship: string | null;

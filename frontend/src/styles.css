@@ -1185,6 +1185,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 .pill-priority .pill-select-input { width: 88px; }
 /* category names run long ("Straightforward Supplies") — a bit more room */
 .pill-category .pill-select-input { width: 132px; }
+.pill-area .pill-select-input { width: 78px; } /* Produção / Logística fit snug */
 .pill-priority.sel-crit { background: var(--critical-wash); border-color: color-mix(in srgb, var(--critical) 22%, transparent); }
 .pill-priority.sel-warn { background: color-mix(in srgb, #fab219 16%, transparent); border-color: color-mix(in srgb, #fab219 34%, transparent); }
 

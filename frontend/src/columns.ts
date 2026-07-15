@@ -30,6 +30,7 @@ export const CATEGORY_OPTIONS = [
   "Vinyl",
   "Straightforward Supplies",
 ];
+export const AREA_OPTIONS = ["Produção", "Logística"];
 export const DEST_TYPE_OPTIONS = ["CSS - Stock", "CSR - Replacement"];
 export const SHIPPING_OPTIONS = [
   "1 - UPS",
@@ -70,6 +71,7 @@ export const COLUMNS: Col[] = [
   { key: "status", label: "Status", type: "select", group: "team", editable: true, options: STATUS_OPTIONS },
   { key: "priority", label: "Priority", type: "select", group: "team", editable: true, options: PRIORITY_OPTIONS },
   { key: "category", label: "Category", type: "select", group: "team", editable: true, options: CATEGORY_OPTIONS },
+  { key: "area", label: "Área", type: "select", group: "team", editable: true, options: AREA_OPTIONS },
   { key: "of_number", label: "OF", type: "text", group: "team", editable: true },
   { key: "pc_number", label: "PC", type: "text", group: "team", editable: true },
   { key: "dest_type", label: "Dest Type", type: "select", group: "team", editable: true, options: DEST_TYPE_OPTIONS },
@@ -98,7 +100,7 @@ export const FIELD_LABELS: Record<string, string> = {
 const TABLE_KEYS: (keyof Part)[] = [
   "poh_num", "item_code", "item_desc", "qty_ordered", "qty_received",
   "balance_qty", "line_value", "po_date",
-  "expected_receipt", "status", "priority", "category",
+  "expected_receipt", "status", "priority", "area", "category",
   "of_number", "pc_number",
 ];
 export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
@@ -107,7 +109,7 @@ export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
 
 /* Detail drawer form, grouped into sections */
 export const DETAIL_GROUPS: { title: string; keys: (keyof Part)[] }[] = [
-  { title: "Workflow", keys: ["status", "priority", "category"] },
+  { title: "Workflow", keys: ["status", "priority", "area", "category"] },
   { title: "References", keys: ["of_number", "pc_number", "tank"] },
   { title: "Logistics", keys: ["dest_type", "shipping_method", "tracking"] },
   {
