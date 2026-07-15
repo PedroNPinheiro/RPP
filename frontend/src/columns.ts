@@ -99,7 +99,7 @@ export const FIELD_LABELS: Record<string, string> = {
    detail drawer. This is what keeps the table free of horizontal scroll. */
 const TABLE_KEYS: (keyof Part)[] = [
   "poh_num", "item_code", "item_desc", "qty_ordered", "qty_received",
-  "balance_qty", "line_value", "po_date",
+  "balance_qty", "po_date",
   "expected_receipt", "status", "priority", "area", "category",
   "of_number", "pc_number",
 ];
