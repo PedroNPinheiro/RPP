@@ -98,7 +98,40 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  transition: width 0.18s ease, padding 0.18s ease;
 }
+
+/* ----- collapsed rail: icons only, content gains the width ----- */
+.sidebar.min { width: 72px; padding: 16px 10px; }
+.sidebar.min .nav-item { justify-content: center; padding: 10px 0; }
+.sidebar.min .nav-item span { display: none; } /* text + chevron; svg stays */
+.sidebar.min .nav-label { visibility: hidden; }
+.sidebar.min .side-brand { padding: 10px 0 16px; }
+.sidebar.min .brand-mark { width: 34px; height: 34px; font-size: 13px; border-radius: 9px; }
+.sidebar.min .user-chip { flex-direction: column; gap: 8px; padding: 10px 6px; }
+.sidebar.min .user-meta { display: none; }
+
+.side-toggle {
+  position: absolute;
+  top: 30px;
+  right: -13px;
+  z-index: 20;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--ring);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 2px;
+}
+.side-toggle:hover { color: var(--accent); border-color: var(--accent); }
 
 /* brand sits straight on the sidebar — no white card */
 .side-brand {

@@ -24,12 +24,15 @@ function initials(name: string): string {
 }
 
 /* company brand: white knockout of the logo straight on the dark sidebar
-   (frontend/public/logo-dark.png); falls back to the RP mark if missing */
-function LogoCard() {
+   (frontend/public/logo-dark.png); falls back to the RP mark if missing.
+   Collapsed rail shows the compact RP tile (same mark as the favicon). */
+function LogoCard({ mini }: { mini: boolean }) {
   const [hasLogo, setHasLogo] = useState(true);
   return (
     <div className="side-brand">
-      {hasLogo ? (
+      {mini ? (
+        <span className="brand-mark" title="CASCO Pet — Replacement Parts">RP</span>
+      ) : hasLogo ? (
         <img src="/logo-dark.png" alt="CASCO Pet" onError={() => setHasLogo(false)} />
       ) : (
         <div className="logo-fallback">
@@ -48,6 +51,11 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [user, setUser] = useState<AuthUser | null | "loading">("loading");
+  const [sideMin, setSideMin] = useState(() => localStorage.getItem("rpp-side") === "min");
+
+  useEffect(() => {
+    localStorage.setItem("rpp-side", sideMin ? "min" : "full");
+  }, [sideMin]);
 
   // gate the app: who am I? if unauthenticated, show the login screen
   useEffect(() => {
@@ -114,16 +122,30 @@ export default function App() {
   return (
     <AppCtx.Provider value={ctx}>
     <div className="shell">
-      <aside className="sidebar">
-        <LogoCard />
+      <aside className={`sidebar${sideMin ? " min" : ""}`}>
+        <button
+          className="side-toggle"
+          onClick={() => setSideMin((m) => !m)}
+          title={sideMin ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={sideMin ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sideMin ? "»" : "«"}
+        </button>
+        <LogoCard mini={sideMin} />
         <div className="nav-label">Navigation</div>
-        <NavLink to="/" end className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}>
+        <NavLink
+          to="/"
+          end
+          title="Dashboard"
+          className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}
+        >
           <IconGrid />
           <span>Dashboard</span>
           <span className="nav-chev">›</span>
         </NavLink>
         <NavLink
           to="/analytics"
+          title="Analytics"
           className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}
         >
           <IconChart />
@@ -132,6 +154,7 @@ export default function App() {
         </NavLink>
         <NavLink
           to="/activity"
+          title="Activity"
           className={({ isActive }) => `nav-item${isActive ? " on" : ""}`}
         >
           <IconClock />
@@ -143,7 +166,9 @@ export default function App() {
 
         {user && (
           <div className="user-chip">
-            <span className="user-avatar">{initials(user.name)}</span>
+            <span className="user-avatar" title={`${user.name} (${user.email})`}>
+              {initials(user.name)}
+            </span>
             <span className="user-meta">
               <span className="user-name" title={user.email}>
                 {user.name}
