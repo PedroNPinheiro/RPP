@@ -23,7 +23,7 @@ interface Props {
 function statusTone(colKey: string, v: string): string {
   if (colKey === "priority" && v.startsWith("P1")) return " sel-crit";
   if (colKey === "priority" && v.startsWith("P2")) return " sel-warn";
-  if (colKey === "status" && v === "Completo") return " sel-info";
+  if (colKey === "status" && v === "Completo") return " sel-good";
   if (colKey === "status" && v.startsWith("Problema")) return " sel-crit";
   if (colKey === "status" && v === "Pronto para Sair") return " sel-ready";
   if (colKey === "status" && v === "Cancelado") return " sel-off";

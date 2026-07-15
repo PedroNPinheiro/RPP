@@ -19,11 +19,11 @@ export const STATUS_ORDER = [
 export const STATUS_COLORS: Record<string, string> = {
   "Por Iniciar": "#64748b",
   "Em Andamento": "#eda100",
-  "Pronto para Sair": "#0ca30c",
-  "Enviado/Já Saiu": "#2a78d6", // retired; styled blue in-app like Completo
+  "Pronto para Sair": "#1baf7a", // teal-green — distinct from Completo's green
+  "Enviado/Já Saiu": "#2a78d6", // retired; styled blue in-app
   "Problema/Falta de Informação": "#d03b3b",
   "Cancelado": "#475569",
-  "Completo": "#2a78d6",
+  "Completo": "#0ca30c",
 };
 
 export const PRIORITY_ORDER = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];
