@@ -522,7 +522,7 @@ thead .head-row th.num { text-align: right; }
 thead .head-row th:not(.th-flex) { width: 1%; }
 
 tbody td {
-  padding: 11px 12px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--grid);
   color: var(--ink-1);
 }
@@ -594,9 +594,9 @@ td.date-cell {
 }
 .st-todo { background: var(--ink-3); }
 .st-prog { background: #fab219; }
-.st-done { background: var(--good); }
+.st-done { background: var(--accent); }
 .st-ship { background: var(--accent); }
-.st-ready { background: #1baf7a; }
+.st-ready { background: var(--good); }
 .st-cancel { background: var(--ink-3); }
 .st-crit { background: var(--critical); }
 
@@ -655,9 +655,9 @@ td.date-cell {
   border: 1px solid color-mix(in srgb, var(--critical) 30%, transparent);
 }
 .chip.ready {
-  background: var(--good-wash);
-  color: var(--good-text);
-  border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+  background: var(--hover-wash);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .chip.neutral {
   color: var(--ink-2);
@@ -673,7 +673,7 @@ td.date-cell {
   font-variant-numeric: tabular-nums;
 }
 .dstat.late { color: var(--critical); }
-.dstat.ok { color: var(--good-text); }
+.dstat.ok { color: var(--accent); }
 .dstat.quiet { color: var(--ink-3); font-weight: 400; }
 
 /* ---------- inline editors ---------- */
@@ -730,7 +730,7 @@ tr.line-row:hover .cell-select.sel-empty {
 .sel-crit { color: var(--critical); font-weight: 600; }
 .sel-warn { color: var(--team-ink); font-weight: 600; }
 .sel-good { color: var(--good-text); font-weight: 600; }
-.sel-ready { color: #0e8a5f; font-weight: 600; }
+.sel-ready { color: var(--good-text); font-weight: 600; }
 .sel-info { color: var(--accent); font-weight: 600; }
 .sel-off { color: var(--ink-3); font-weight: 600; }
 
@@ -1106,7 +1106,7 @@ td.po-cell { font-variant-numeric: tabular-nums; }
   align-items: center;
   gap: 6px;
   max-width: 210px;
-  padding: 3px 9px;
+  padding: 2px 8px;
   border: 1px solid var(--ring);
   border-radius: 999px;
   background: var(--surface);
@@ -1153,7 +1153,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 .pill-select.sel-warn { color: var(--team-ink); }
 .pill-select.sel-good { color: var(--good-text); }
 .pill-select.sel-info { color: var(--accent); }
-.pill-select.sel-ready { color: #0e8a5f; }
+.pill-select.sel-ready { color: var(--good-text); }
 .pill-select.sel-off { color: var(--ink-3); }
 
 /* Priority: full colored badge (no dot) */
@@ -1323,8 +1323,8 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 tr.row-prog td { background: color-mix(in srgb, #fab219 14%, var(--surface)); }
 tr.row-crit td { background: color-mix(in srgb, var(--critical) 13%, var(--surface)); }
 tr.row-done td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
-tr.row-comp td { background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
-tr.row-ready td { background: color-mix(in srgb, #1baf7a 14%, var(--surface)); }
+tr.row-comp td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+tr.row-ready td { background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
 tr.row-cancel td { background: color-mix(in srgb, var(--ink-3) 12%, var(--surface)); }
 tr.row-cancel td:not(.team) { color: var(--ink-3); }
 tr.line-row:hover td { background: var(--hover-wash); }
