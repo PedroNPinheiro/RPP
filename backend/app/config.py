@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     # Comma-separated recipient list for the "drawings required" alert.
     notify_drawings_to: str = ""
+    # Optional comma-separated BCC list (envelope-only; header never sent).
+    notify_drawings_bcc: str = ""
 
     @property
     def cors_list(self) -> list[str]:

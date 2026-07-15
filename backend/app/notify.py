@@ -58,6 +58,12 @@ def send_drawings_notification(rows: list[dict], changed_by: str) -> None:
         msg["Subject"] = subject
         msg["From"] = settings.smtp_user
         msg["To"] = ", ".join(a.strip() for a in settings.notify_drawings_to.split(",") if a.strip())
+        if settings.notify_drawings_bcc:
+            # smtplib.send_message adds Bcc to the envelope but strips the
+            # header, so recipients never see the copy
+            msg["Bcc"] = ", ".join(
+                a.strip() for a in settings.notify_drawings_bcc.split(",") if a.strip()
+            )
         msg.set_content(body)
 
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as s:
