@@ -1149,6 +1149,8 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 /* Priority: full colored badge (no dot) */
 .pill-priority { background: color-mix(in srgb, var(--ink-3) 11%, transparent); border-color: transparent; }
 .pill-priority .pill-select-input { width: 88px; }
+/* category names run long ("Straightforward Supplies") — a bit more room */
+.pill-category .pill-select-input { width: 132px; }
 .pill-priority.sel-crit { background: var(--critical-wash); border-color: color-mix(in srgb, var(--critical) 22%, transparent); }
 .pill-priority.sel-warn { background: color-mix(in srgb, #fab219 16%, transparent); border-color: color-mix(in srgb, #fab219 34%, transparent); }
 

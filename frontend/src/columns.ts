@@ -98,7 +98,7 @@ export const FIELD_LABELS: Record<string, string> = {
 const TABLE_KEYS: (keyof Part)[] = [
   "poh_num", "item_code", "item_desc", "qty_ordered", "qty_received",
   "balance_qty", "line_value", "po_date",
-  "expected_receipt", "delay_days", "status", "priority",
+  "expected_receipt", "status", "priority", "category",
   "of_number", "pc_number",
 ];
 export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
