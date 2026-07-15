@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useApp } from "../AppCtx";
 import { TABLE_COLUMNS, type Col } from "../columns";
 import { fmtDate } from "../format";
 import { isCancelled, isClosed, isCompleted } from "../logic";
@@ -92,6 +93,7 @@ function renderLine(
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>,
   onOpen: (p: Part) => void,
   selected: boolean,
+  check: { canEdit: boolean; checked: boolean; onToggle: (id: number) => void },
 ) {
   return (
     <tr
@@ -101,6 +103,16 @@ function renderLine(
       }`}
       onClick={() => onOpen(p)}
     >
+      {check.canEdit && (
+        <td className="sel-cell" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={check.checked}
+            onChange={() => check.onToggle(p.id)}
+            aria-label="Select line"
+          />
+        </td>
+      )}
       {cols.map((c) => {
         if (c.key === "poh_num") {
           // Sage line numbers (1000, 2000…) are noise for the team — the
@@ -198,9 +210,23 @@ interface Props {
   selectedId: number | null;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
   onOpen: (p: Part) => void;
+  checkedIds: Set<number>;
+  onToggleCheck: (id: number) => void;
+  onCheckMany: (ids: number[], on: boolean) => void;
 }
 
-export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, onOpen }: Props) {
+export function PartsTable({
+  parts,
+  totalCount,
+  grouped,
+  selectedId,
+  onPatch,
+  onOpen,
+  checkedIds,
+  onToggleCheck,
+  onCheckMany,
+}: Props) {
+  const { canEdit } = useApp();
   const [sortKey, setSortKey] = useState<keyof Part>("poh_num");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -265,6 +291,17 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
         <table>
           <thead>
             <tr className="head-row">
+              {canEdit && (
+                <th className="sel-th">
+                  <input
+                    type="checkbox"
+                    checked={parts.length > 0 && parts.every((p) => checkedIds.has(p.id))}
+                    onChange={(e) => onCheckMany(parts.map((p) => p.id), e.target.checked)}
+                    title="Select all visible lines"
+                    aria-label="Select all visible lines"
+                  />
+                </th>
+              )}
               {cols.map((c) => (
                 <th
                   key={String(c.key)}
@@ -298,8 +335,21 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                       key={po}
                       header={
                         <tr className="po-header" onClick={() => toggleGroup(po)}>
-                          <td colSpan={cols.length + 1}>
+                          <td colSpan={cols.length + 1 + (canEdit ? 1 : 0)}>
                             <div className="po-header-content">
+                              {canEdit && (
+                                <input
+                                  type="checkbox"
+                                  className="group-check"
+                                  checked={lines.every((l) => checkedIds.has(l.id))}
+                                  onChange={(e) =>
+                                    onCheckMany(lines.map((l) => l.id), e.target.checked)
+                                  }
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="Select all lines of this PO"
+                                  aria-label="Select all lines of this PO"
+                                />
+                              )}
                               <span className="po-chevron">{isOpen ? "▾" : "▸"}</span>
                               <strong>{po}</strong>
                               <span className="po-meta">{first.supplier_name}</span>
@@ -318,7 +368,11 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                       lines={
                         isOpen
                           ? lines.map((p) =>
-                              renderLine(p, cols, true, onPatch, onOpen, p.id === selectedId),
+                              renderLine(p, cols, true, onPatch, onOpen, p.id === selectedId, {
+                                canEdit,
+                                checked: checkedIds.has(p.id),
+                                onToggle: onToggleCheck,
+                              }),
                             )
                           : []
                       }
@@ -326,11 +380,15 @@ export function PartsTable({ parts, totalCount, grouped, selectedId, onPatch, on
                   );
                 })
               : sorted.map((p) =>
-                  renderLine(p, cols, false, onPatch, onOpen, p.id === selectedId),
+                  renderLine(p, cols, false, onPatch, onOpen, p.id === selectedId, {
+                    canEdit,
+                    checked: checkedIds.has(p.id),
+                    onToggle: onToggleCheck,
+                  }),
                 )}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={cols.length + 1} className="empty">
+                <td colSpan={cols.length + 1 + (canEdit ? 1 : 0)} className="empty">
                   {totalCount === 0
                     ? "No replacement-parts POs yet. Tick the checkbox on a PO in Sage."
                     : "Nothing matches the current filter."}

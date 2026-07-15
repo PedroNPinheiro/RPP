@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { CATEGORY_OPTIONS } from "../columns";
+import { useApp } from "../AppCtx";
+import { CATEGORY_OPTIONS, COLUMNS } from "../columns";
 import type { Part } from "../types";
 import { isCancelled, isClosed, isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
@@ -15,14 +16,55 @@ interface Props {
   parts: Part[];
   loading: boolean;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
+  onBulkPatch: (ids: number[], fields: Partial<Part>) => Promise<void>;
 }
 
-export function Dashboard({ parts, loading, onPatch }: Props) {
+/* fields offered in the bulk bar: every editable team column except
+   booleans (no clear tri-state) */
+const BULK_COLS = COLUMNS.filter((c) => c.editable && c.type !== "bool");
+
+export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
+  const { canEdit } = useApp();
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [grouped, setGrouped] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [checked, setChecked] = useState<Set<number>>(new Set());
+  const [bulkField, setBulkField] = useState<keyof Part>("shipping_method");
+  const [bulkValue, setBulkValue] = useState("");
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleChecked = (id: number) =>
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const checkMany = (ids: number[], on: boolean) =>
+    setChecked((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (on) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+
+  const bulkCol = BULK_COLS.find((c) => c.key === bulkField)!;
+  const applyBulk = async () => {
+    setBulkBusy(true);
+    try {
+      await onBulkPatch([...checked], { [bulkField]: bulkValue || null } as Partial<Part>);
+      setChecked(new Set());
+      setBulkValue("");
+    } catch {
+      /* error surfaced by App; keep selection so the user can retry */
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   // derive from the live list so drawer edits show immediately
   const selected = useMemo(
@@ -139,7 +181,54 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
         selectedId={selectedId}
         onPatch={onPatch}
         onOpen={(p) => setSelectedId(p.id)}
+        checkedIds={checked}
+        onToggleCheck={toggleChecked}
+        onCheckMany={checkMany}
       />
+
+      {canEdit && checked.size > 0 && (
+        <div className="bulk-bar">
+          <span className="bulk-count">{checked.size} selected</span>
+          <select
+            className="filter-select"
+            value={String(bulkField)}
+            onChange={(e) => {
+              setBulkField(e.target.value as keyof Part);
+              setBulkValue("");
+            }}
+          >
+            {BULK_COLS.map((c) => (
+              <option key={String(c.key)} value={String(c.key)}>{c.label}</option>
+            ))}
+          </select>
+          {bulkCol.type === "select" ? (
+            <select
+              className="filter-select"
+              value={bulkValue}
+              onChange={(e) => setBulkValue(e.target.value)}
+            >
+              <option value="">— clear —</option>
+              {bulkCol.options?.map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              className="filter-select"
+              type={bulkCol.type === "date" ? "date" : "text"}
+              value={bulkValue}
+              placeholder="value (empty clears)"
+              onChange={(e) => setBulkValue(e.target.value)}
+            />
+          )}
+          <button className="btn" disabled={bulkBusy} onClick={applyBulk}>
+            {bulkBusy ? "Applying…" : `Apply to ${checked.size}`}
+          </button>
+          <button className="btn" onClick={() => setChecked(new Set())} title="Clear selection">
+            ✕
+          </button>
+        </div>
+      )}
         </>
       )}
 

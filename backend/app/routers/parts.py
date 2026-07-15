@@ -3,7 +3,7 @@ from psycopg.rows import dict_row
 
 from ..auth import get_current_user, require_editor
 from ..db import pool
-from ..schemas import AuditEntry, Part, PartUpdate
+from ..schemas import AuditEntry, BulkUpdate, Part, PartUpdate
 
 router = APIRouter(prefix="/api/parts", tags=["parts"])
 
@@ -22,6 +22,59 @@ def list_parts(user: dict = Depends(get_current_user)):
 def _s(v) -> str | None:
     """Stringify a value for the audit log (None stays NULL)."""
     return None if v is None else str(v)
+
+
+@router.post("/bulk", response_model=list[Part])
+def bulk_update(patch: BulkUpdate, user: dict = Depends(require_editor)):
+    """Apply the same team-field values to many lines in one transaction.
+    Audits per line, exactly like single edits. POST (not PATCH) so the
+    path can't be shadowed by the /{part_id} route."""
+    fields = patch.fields.model_dump(exclude_unset=True)
+    if not fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    if not patch.ids:
+        raise HTTPException(status_code=400, detail="No lines selected")
+
+    cols = list(fields.keys())
+    set_clause = ", ".join(f"{col} = %({col})s" for col in cols)
+
+    with pool.connection() as conn:
+        conn.row_factory = dict_row
+        current_rows = conn.execute(
+            f"SELECT id, poh_num, poh_line, {', '.join(cols)} FROM parts "
+            f"WHERE id = ANY(%s) FOR UPDATE",
+            (patch.ids,),
+        ).fetchall()
+        if not current_rows:
+            raise HTTPException(status_code=404, detail="No matching lines")
+
+        conn.execute(
+            f"UPDATE parts SET {set_clause}, updated_by = %(updated_by)s, "
+            f"updated_at = now() WHERE id = ANY(%(ids)s)",
+            {**fields, "ids": patch.ids, "updated_by": user["email"]},
+        )
+        audit_rows = [
+            (row["id"], row["poh_num"], row["poh_line"],
+             col, _s(row[col]), _s(fields[col]), user["email"])
+            for row in current_rows
+            for col in cols
+            if row[col] != fields[col]
+        ]
+        if audit_rows:
+            with conn.cursor() as cur:
+                cur.executemany(
+                    "INSERT INTO part_audit "
+                    "(part_id, poh_num, poh_line, field, old_value, new_value, changed_by) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    audit_rows,
+                )
+        conn.commit()
+
+        return conn.execute(
+            "SELECT * FROM parts_dashboard WHERE id = ANY(%s) "
+            "ORDER BY poh_num, poh_line",
+            (patch.ids,),
+        ).fetchall()
 
 
 @router.patch("/{part_id}", response_model=Part)

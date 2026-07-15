@@ -19,6 +19,16 @@ export async function patchPart(id: number, fields: Partial<Part>): Promise<Part
   return r.json();
 }
 
+export async function bulkPatch(ids: number[], fields: Partial<Part>): Promise<Part[]> {
+  const r = await fetch(`${BASE}/parts/bulk`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids, fields }),
+  });
+  if (!r.ok) throw new Error(`Failed to save (${r.status})`);
+  return r.json();
+}
+
 export async function getSyncStatus(): Promise<SyncStatus | null> {
   const r = await fetch(`${BASE}/sync-status`);
   if (!r.ok) return null;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
-import { getParts, getSyncStatus, patchPart } from "./api";
+import { bulkPatch, getParts, getSyncStatus, patchPart } from "./api";
 import { AppCtx } from "./AppCtx";
 import type { Part, SyncStatus } from "./types";
 import { IconChart, IconClock, IconGrid } from "./components/Icons";
@@ -107,6 +107,17 @@ export default function App() {
     }
   }, []);
 
+  const handleBulkPatch = useCallback(async (ids: number[], fields: Partial<Part>) => {
+    try {
+      const updated = await bulkPatch(ids, fields);
+      const byId = new Map(updated.map((u) => [u.id, u]));
+      setParts((prev) => prev.map((p) => byId.get(p.id) ?? p));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      throw e; // let the bulk bar keep the selection on failure
+    }
+  }, []);
+
   const canEdit = typeof user === "object" && user !== null ? user.role === "editor" : true;
   const ctx = {
     theme,
@@ -196,7 +207,14 @@ export default function App() {
           <Routes>
             <Route
               path="/"
-              element={<Dashboard parts={parts} loading={loading} onPatch={handlePatch} />}
+              element={
+                <Dashboard
+                  parts={parts}
+                  loading={loading}
+                  onPatch={handlePatch}
+                  onBulkPatch={handleBulkPatch}
+                />
+              }
             />
             <Route path="/analytics" element={<Analytics parts={parts} loading={loading} />} />
             <Route path="/activity" element={<Activity />} />

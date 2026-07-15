@@ -92,6 +92,12 @@ class PartUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+class BulkUpdate(BaseModel):
+    """Bulk edit: same PartUpdate whitelist applied to many lines at once."""
+    ids: list[int]
+    fields: PartUpdate
+
+
 class SyncStatus(BaseModel):
     started_at: Optional[datetime] = None
     rows_upserted: Optional[int] = None
