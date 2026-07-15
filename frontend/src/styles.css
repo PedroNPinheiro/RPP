@@ -260,7 +260,7 @@ body {
 
 
 .content {
-  padding: 28px 40px 48px;
+  padding: 28px 24px 48px;
   max-width: 1880px;
   width: 100%;
   margin: 0 auto;
@@ -541,7 +541,7 @@ thead .head-row th {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: left;
-  padding: 13px 12px 11px;
+  padding: 13px 8px 11px;
   border-bottom: 1px solid var(--grid);
   box-shadow: 0 8px 12px -12px rgba(15, 23, 42, 0.45);
   cursor: pointer;
@@ -556,7 +556,7 @@ thead .head-row th.num { text-align: right; }
 thead .head-row th:not(.th-flex) { width: 1%; }
 
 tbody td {
-  padding: 7px 12px;
+  padding: 7px 8px;
   border-bottom: 1px solid var(--grid);
   color: var(--ink-1);
 }
@@ -703,7 +703,7 @@ td.date-cell {
 /* ---------- inline editors ---------- */
 .cell-input {
   width: 100%;
-  min-width: 80px;
+  min-width: 64px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--ink-1);
@@ -1184,7 +1184,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 .pill-priority { background: color-mix(in srgb, var(--ink-3) 11%, transparent); border-color: transparent; }
 .pill-priority .pill-select-input { width: 88px; }
 /* category names run long ("Straightforward Supplies") — a bit more room */
-.pill-category .pill-select-input { width: 132px; }
+.pill-category .pill-select-input { width: 116px; }
 .pill-area .pill-select-input { width: 78px; } /* Produção / Logística fit snug */
 .pill-priority.sel-crit { background: var(--critical-wash); border-color: color-mix(in srgb, var(--critical) 22%, transparent); }
 .pill-priority.sel-warn { background: color-mix(in srgb, #fab219 16%, transparent); border-color: color-mix(in srgb, #fab219 34%, transparent); }
