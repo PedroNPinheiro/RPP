@@ -5,7 +5,7 @@ import type { Part } from "../types";
 import { isCancelled, isClosed, isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
 import { PartDetail } from "../components/PartDetail";
-import { PartsTable } from "../components/PartsTable";
+import { PartsTable, type GroupOrder } from "../components/PartsTable";
 import { DashboardSkeleton } from "../components/Skeleton";
 import { StatTiles } from "../components/StatTiles";
 import { exportCsv } from "../csv";
@@ -29,6 +29,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [grouped, setGrouped] = useState(true);
+  const [groupOrder, setGroupOrder] = useState<GroupOrder>("po");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [bulkField, setBulkField] = useState<keyof Part>("shipping_method");
@@ -157,6 +158,18 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
           >
             Group by PO
           </button>
+          {grouped && (
+            <select
+              className="filter-select"
+              value={groupOrder}
+              onChange={(e) => setGroupOrder(e.target.value as GroupOrder)}
+              title="Order of the PO groups"
+            >
+              <option value="po">Order · PO №</option>
+              <option value="date_desc">Order · newest PO</option>
+              <option value="date_asc">Order · oldest PO</option>
+            </select>
+          )}
           <button
             className="btn"
             onClick={() => exportCsv(visible)}
@@ -178,6 +191,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
         parts={visible}
         totalCount={parts.length}
         grouped={grouped}
+        groupOrder={groupOrder}
         selectedId={selectedId}
         onPatch={onPatch}
         onOpen={(p) => setSelectedId(p.id)}

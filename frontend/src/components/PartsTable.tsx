@@ -203,10 +203,13 @@ function renderLine(
 
 type SortDir = "asc" | "desc";
 
+export type GroupOrder = "po" | "date_desc" | "date_asc";
+
 interface Props {
   parts: Part[];
   totalCount: number;
   grouped: boolean;
+  groupOrder: GroupOrder;
   selectedId: number | null;
   onPatch: (id: number, fields: Partial<Part>) => Promise<void>;
   onOpen: (p: Part) => void;
@@ -219,6 +222,7 @@ export function PartsTable({
   parts,
   totalCount,
   grouped,
+  groupOrder,
   selectedId,
   onPatch,
   onOpen,
@@ -280,10 +284,18 @@ export function PartsTable({
       if (g) g.push(p);
       else m.set(p.poh_num, [p]);
     }
-    const keys = [...m.keys()].sort((a, b) => a.localeCompare(b));
-    if (sortKey === "poh_num" && sortDir === "desc") keys.reverse();
+    const keys = [...m.keys()];
+    if (groupOrder === "po") {
+      keys.sort((a, b) => a.localeCompare(b));
+      if (sortKey === "poh_num" && sortDir === "desc") keys.reverse();
+    } else {
+      // PO date is PO-level, so any line of the group carries it
+      const dateOf = (k: string) => m.get(k)![0].po_date ?? "";
+      keys.sort((a, b) => dateOf(a).localeCompare(dateOf(b)) || a.localeCompare(b));
+      if (groupOrder === "date_desc") keys.reverse();
+    }
     return keys.map((k) => ({ po: k, lines: m.get(k)! }));
-  }, [sorted, sortKey, sortDir]);
+  }, [sorted, sortKey, sortDir, groupOrder]);
 
   return (
     <div className="table-card">
