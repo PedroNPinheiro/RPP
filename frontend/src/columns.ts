@@ -82,6 +82,7 @@ const TABLE_KEYS: (keyof Part)[] = [
   "poh_num", "item_code", "item_desc", "qty_ordered", "qty_received",
   "balance_qty", "line_value", "po_date", "supplier_name",
   "expected_receipt", "delay_days", "status", "priority",
+  "of_number", "pc_number",
 ];
 export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
   (k) => COLUMNS.find((c) => c.key === k)!,

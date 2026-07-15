@@ -1086,6 +1086,12 @@ td.po-cell { font-variant-numeric: tabular-nums; }
   font-weight: inherit;
   appearance: none;
   cursor: pointer;
+  /* a select's closed face sizes to its WIDEST option — cap it so the
+     status column doesn't reserve room for the longest status name */
+  width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 176px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1114,6 +1120,7 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
 
 /* Priority: full colored badge (no dot) */
 .pill-priority { background: color-mix(in srgb, var(--ink-3) 11%, transparent); border-color: transparent; }
+.pill-priority .pill-select-input { width: 88px; }
 .pill-priority.sel-crit { background: var(--critical-wash); border-color: color-mix(in srgb, var(--critical) 22%, transparent); }
 .pill-priority.sel-warn { background: color-mix(in srgb, #fab219 16%, transparent); border-color: color-mix(in srgb, #fab219 34%, transparent); }
 
@@ -1519,7 +1526,7 @@ input:focus-visible,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 176px;
+  max-width: 118px;
 }
 .f-ro {
   padding: 7px 11px;
