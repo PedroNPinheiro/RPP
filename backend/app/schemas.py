@@ -38,6 +38,7 @@ class Part(BaseModel):
     production_closing: Optional[date] = None
     status: Optional[str] = None
     priority: Optional[str] = None
+    category: Optional[str] = None
     tank: Optional[str] = None
     estimated_date: Optional[date] = None
     required_ship: Optional[date] = None
@@ -77,6 +78,7 @@ class PartUpdate(BaseModel):
     production_closing: Optional[date] = None
     status: Optional[str] = None
     priority: Optional[str] = None
+    category: Optional[str] = None
     tank: Optional[str] = None
     estimated_date: Optional[date] = None
     required_ship: Optional[date] = None

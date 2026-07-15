@@ -33,6 +33,7 @@ export interface Part {
   production_closing: string | null;
   status: string | null;
   priority: string | null;
+  category: string | null;
   tank: string | null;
   estimated_date: string | null;
   required_ship: string | null;

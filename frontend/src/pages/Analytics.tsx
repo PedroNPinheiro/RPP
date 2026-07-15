@@ -27,6 +27,7 @@ type Completion = "all" | "open" | "completed";
 
 const FILTERS: { key: DimKey; label: string }[] = [
   { key: "supplier_name", label: "Supplier" },
+  { key: "category", label: "Category" },
   { key: "line_site", label: "Site" },
   { key: "dest_type", label: "Dest Type" },
   { key: "status", label: "Status" },

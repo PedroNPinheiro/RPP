@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { CATEGORY_OPTIONS } from "../columns";
 import type { Part } from "../types";
 import { isCancelled, isClosed, isCompleted, isDelayed } from "../logic";
 import { PageHeader } from "../components/PageHeader";
@@ -19,6 +20,7 @@ interface Props {
 export function Dashboard({ parts, loading, onPatch }: Props) {
   const [view, setView] = useState<View>("open");
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
   const [grouped, setGrouped] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -34,6 +36,7 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
     if (view === "delayed") rows = rows.filter(isDelayed);
     if (view === "completed") rows = rows.filter(isCompleted);
     if (view === "cancelled") rows = rows.filter(isCancelled);
+    if (category) rows = rows.filter((p) => (p.category || "") === category);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter((p) =>
@@ -43,7 +46,7 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
       );
     }
     return rows;
-  }, [parts, view, search]);
+  }, [parts, view, search, category]);
 
   const counts = useMemo(
     () => ({
@@ -94,6 +97,17 @@ export function Dashboard({ parts, loading, onPatch }: Props) {
           </button>
         </div>
         <div className="toolbar-right">
+          <select
+            className="filter-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            title="Filter by category"
+          >
+            <option value="">All categories</option>
+            {CATEGORY_OPTIONS.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
           <button
             className={`btn${grouped ? " btn-on" : ""}`}
             onClick={() => setGrouped((g) => !g)}

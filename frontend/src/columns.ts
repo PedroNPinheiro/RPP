@@ -14,6 +14,22 @@ export interface Col {
 }
 
 export const PRIORITY_OPTIONS = ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"];
+/* the team's categories, carried over from the old Smartsheet sections */
+export const CATEGORY_OPTIONS = [
+  "DIRECT CASCO US",
+  "DIRECT CASCO UK",
+  "DIRECT TO STORE",
+  "STOCK IN HOUSE",
+  "Electrics",
+  "Aluminium",
+  "WK",
+  "Plumbing",
+  "Glass Tanks",
+  "GLASS COMPONENTS",
+  "Joinery",
+  "Vinyl",
+  "Straightforward Supplies",
+];
 export const DEST_TYPE_OPTIONS = ["CSS - Stock", "CSR - Replacement"];
 export const SHIPPING_OPTIONS = [
   "1 - UPS",
@@ -53,6 +69,7 @@ export const COLUMNS: Col[] = [
 
   { key: "status", label: "Status", type: "select", group: "team", editable: true, options: STATUS_OPTIONS },
   { key: "priority", label: "Priority", type: "select", group: "team", editable: true, options: PRIORITY_OPTIONS },
+  { key: "category", label: "Category", type: "select", group: "team", editable: true, options: CATEGORY_OPTIONS },
   { key: "of_number", label: "OF", type: "text", group: "team", editable: true },
   { key: "pc_number", label: "PC", type: "text", group: "team", editable: true },
   { key: "dest_type", label: "Dest Type", type: "select", group: "team", editable: true, options: DEST_TYPE_OPTIONS },
@@ -90,7 +107,7 @@ export const TABLE_COLUMNS: Col[] = TABLE_KEYS.map(
 
 /* Detail drawer form, grouped into sections */
 export const DETAIL_GROUPS: { title: string; keys: (keyof Part)[] }[] = [
-  { title: "Workflow", keys: ["status", "priority"] },
+  { title: "Workflow", keys: ["status", "priority", "category"] },
   { title: "References", keys: ["of_number", "pc_number", "tank"] },
   { title: "Logistics", keys: ["dest_type", "shipping_method", "tracking"] },
   {

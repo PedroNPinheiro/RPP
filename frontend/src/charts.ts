@@ -91,6 +91,7 @@ export interface LineSeries {
 export type DimKey =
   | "status"
   | "priority"
+  | "category"
   | "dest_type"
   | "supplier_name"
   | "shipping_method"
@@ -99,6 +100,7 @@ export type DimKey =
 export const DIMENSIONS: { key: DimKey; label: string }[] = [
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
+  { key: "category", label: "Category" },
   { key: "dest_type", label: "Dest Type" },
   { key: "supplier_name", label: "Supplier" },
   { key: "shipping_method", label: "Shipping" },

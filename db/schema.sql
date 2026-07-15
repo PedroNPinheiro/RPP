@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS parts (
     sent_to_production  DATE,                -- Sent to Production
     production_closing  DATE,                -- Production Closing Date
     status              TEXT,                -- STATUS (Cheio / Três quartos)
+    category            TEXT,                -- Category (DIRECT CASCO US, Aluminium, ...)
     priority            TEXT,                -- Priority (P1-Critical...)
     tank                TEXT,                -- TANK
     estimated_date      DATE,                -- Estimated
