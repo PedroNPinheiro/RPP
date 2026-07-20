@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup RPP analytics history (status_snapshot)
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+# runs as root so it can `sudo -u postgres pg_dump`
+ExecStart=/opt/rpp/ops/backup_snapshot.sh

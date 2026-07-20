@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly RPP status_snapshot backup
+
+[Timer]
+# 02:30 every day; catch up on next boot if the machine was off
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
