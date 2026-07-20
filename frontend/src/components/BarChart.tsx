@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Bar } from "../charts";
+import { useMaximize } from "./useMaximize";
 
 interface Props {
   title: string;
@@ -32,24 +33,30 @@ const PLOT_H = 210;
 const BAR_MAX = 66;
 
 export function BarChart({ title, bars, format }: Props) {
+  const { max: maximized, button: maxBtn, frame } = useMaximize();
   const fmt = format ?? ((n: number) => String(Math.round(n)));
   const [hover, setHover] = useState<number | null>(null);
 
   const n = Math.max(bars.length, 1);
-  const bandW = Math.min(150, Math.max(70, 560 / n));
-  const barW = Math.min(BAR_MAX, bandW - 26);
+  // maximized: taller plot and roomier bands, since there's screen to spare
+  const plotH = maximized ? Math.max(420, Math.round(window.innerHeight * 0.55)) : PLOT_H;
+  const bandW = maximized
+    ? Math.min(240, Math.max(110, 1100 / n))
+    : Math.min(150, Math.max(70, 560 / n));
+  const barW = Math.min(maximized ? BAR_MAX * 1.6 : BAR_MAX, bandW - 26);
   const plotW = n * bandW;
   const width = M.left + plotW + M.right;
-  const height = M.top + PLOT_H + M.bottom;
+  const height = M.top + plotH + M.bottom;
 
   const max = niceMax(Math.max(0, ...bars.map((b) => b.value)));
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => t * max);
-  const yOf = (v: number) => M.top + PLOT_H - (v / max) * PLOT_H;
+  const yOf = (v: number) => M.top + plotH - (v / max) * plotH;
 
-  return (
-    <div className="chart-card">
+  return frame(
+    <div className={`chart-card${maximized ? " expanded" : ""}`}>
       <div className="chart-head">
         <h3>{title}</h3>
+        {maxBtn}
       </div>
       {bars.length === 0 ? (
         <div className="chart-empty">No data yet</div>
@@ -73,7 +80,7 @@ export function BarChart({ title, bars, format }: Props) {
 
             {bars.map((b, i) => {
               const x = M.left + i * bandW + (bandW - barW) / 2;
-              const h = (b.value / max) * PLOT_H;
+              const h = (b.value / max) * plotH;
               return (
                 <g
                   key={b.label}
@@ -94,7 +101,7 @@ export function BarChart({ title, bars, format }: Props) {
                   </text>
                   <foreignObject
                     x={M.left + i * bandW}
-                    y={M.top + PLOT_H + 6}
+                    y={M.top + plotH + 6}
                     width={bandW}
                     height={M.bottom - 6}
                   >
@@ -104,7 +111,7 @@ export function BarChart({ title, bars, format }: Props) {
                     x={M.left + i * bandW}
                     y={M.top}
                     width={bandW}
-                    height={PLOT_H}
+                    height={plotH}
                     fill="transparent"
                   />
                 </g>

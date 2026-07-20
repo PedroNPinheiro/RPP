@@ -872,6 +872,53 @@ input[type="checkbox"] { accent-color: var(--accent); }
   gap: 12px;
   margin-bottom: 4px;
 }
+
+/* ---------- maximize a chart ---------- */
+.chart-max {
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; /* stays out of the way until the card is hovered */
+  transition: opacity 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.chart-card:hover .chart-max,
+.chart-max:focus-visible { opacity: 1; }
+.chart-max:hover { color: var(--accent); border-color: var(--ring); }
+.chart-card.expanded .chart-max { opacity: 1; }
+
+.chart-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 3vw;
+}
+.chart-overlay-inner {
+  width: min(1600px, 96vw);
+  max-height: 94vh;
+  overflow: auto;
+}
+.chart-card.expanded {
+  padding: 20px 24px 16px;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.55);
+}
+.chart-card.expanded .chart-head h3 { font-size: 16px; }
 .chart-head h3 {
   font-size: 13.5px;
   font-weight: 650;

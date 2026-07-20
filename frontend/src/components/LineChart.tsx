@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { LineSeries } from "../charts";
 import { fmtDate } from "../format";
+import { useMaximize } from "./useMaximize";
 
 interface Props {
   title: string;
@@ -20,6 +21,7 @@ const M = { top: 12, right: 16, bottom: 40, left: 40 };
 const PLOT_H = 210;
 
 export function LineChart({ title, dates, series, emptyText }: Props) {
+  const { max: maximized, button: maxBtn, frame } = useMaximize();
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -50,16 +52,17 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
     return () => ro.disconnect();
   }, [hasData]);
 
-  const plotW = Math.max((n - 1) * 60, fitW - M.left - M.right - 2, 200);
+  const plotH = maximized ? Math.max(420, Math.round(window.innerHeight * 0.55)) : PLOT_H;
+  const plotW = Math.max((n - 1) * (maximized ? 90 : 60), fitW - M.left - M.right - 2, 200);
   const width = M.left + plotW + M.right;
-  const height = M.top + PLOT_H + M.bottom;
+  const height = M.top + plotH + M.bottom;
 
   // scale to what's actually shown, so isolating a small series doesn't
   // leave it looking tiny against the full-set axis
   const max = niceMax(Math.max(1, ...visible.flatMap((s) => s.values)));
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => t * max);
   const xOf = (i: number) => (n <= 1 ? M.left + plotW / 2 : M.left + (i / (n - 1)) * plotW);
-  const yOf = (v: number) => M.top + PLOT_H - (v / max) * PLOT_H;
+  const yOf = (v: number) => M.top + plotH - (v / max) * plotH;
 
   // thin x labels so they don't collide
   const labelStep = Math.ceil(n / 8) || 1;
@@ -72,8 +75,8 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
     setHover(Math.max(0, Math.min(n - 1, i)));
   };
 
-  return (
-    <div className="chart-card">
+  return frame(
+    <div className={`chart-card${maximized ? " expanded" : ""}`}>
       <div className="chart-head">
         <h3>{title}</h3>
         <div className="legend">
@@ -101,6 +104,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
             </button>
           )}
         </div>
+        {maxBtn}
       </div>
 
       {n === 0 ? (
@@ -147,7 +151,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                   <text
                     key={d}
                     x={xOf(i)}
-                    y={M.top + PLOT_H + 16}
+                    y={M.top + plotH + 16}
                     className="tick-label"
                     textAnchor="middle"
                   >
@@ -162,7 +166,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                   x1={xOf(hover)}
                   x2={xOf(hover)}
                   y1={M.top}
-                  y2={M.top + PLOT_H}
+                  y2={M.top + plotH}
                   className="crosshair"
                 />
               )}
