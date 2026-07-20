@@ -271,7 +271,7 @@ export function Analytics({ parts, loading }: Props) {
 
       {/* history — all lines, accumulates daily; date range scopes the days */}
       <div className="section-label">
-        History (all lines · one point per day{bounds.min || bounds.max ? " · date-filtered" : ""})
+        History (open lines · one point per day{bounds.min || bounds.max ? " · date-filtered" : ""})
       </div>
       <div className="charts-grid">
         <LineChart

@@ -10,13 +10,20 @@ router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 NONE_BUCKET = "(no status)"
 
+# Closed = completed or cancelled. The history tracks OPEN lines only, so the
+# trend shows the live backlog (e.g. open P1s) instead of an ever-growing
+# cumulative total that never comes down as work finishes.
+CLOSED_STATUSES = ("Completo", "Cancelado")
+
 # rebuild today's snapshot for both dimensions from the current parts;
 # one statement per execute — psycopg's parameterized queries use prepared
 # statements, which reject multiple commands in a single call
 SNAPSHOT_DIM = """
     INSERT INTO status_snapshot (snap_date, dimension, bucket, count)
     SELECT CURRENT_DATE, %(dim)s, COALESCE(NULLIF({col}, ''), %(none)s), count(*)
-    FROM parts GROUP BY COALESCE(NULLIF({col}, ''), %(none)s)
+    FROM parts
+    WHERE status IS NULL OR status <> ALL(%(closed)s)
+    GROUP BY COALESCE(NULLIF({col}, ''), %(none)s)
 """
 
 
@@ -27,7 +34,10 @@ def rebuild_today() -> None:
     with pool.connection() as conn:
         conn.execute("DELETE FROM status_snapshot WHERE snap_date = CURRENT_DATE")
         for dim in ("status", "priority"):  # dimension name == column name
-            conn.execute(SNAPSHOT_DIM.format(col=dim), {"dim": dim, "none": NONE_BUCKET})
+            conn.execute(
+                SNAPSHOT_DIM.format(col=dim),
+                {"dim": dim, "none": NONE_BUCKET, "closed": list(CLOSED_STATUSES)},
+            )
         conn.commit()
 
 
