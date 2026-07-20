@@ -6,6 +6,11 @@ Scheduler every 15 min. Reads the flagged PO lines from Sage X3 and UPSERTs
 them into cloud Postgres over the WireGuard tunnel. Updates ONLY the
 Sage-owned columns, so the team's manually-filled columns are never touched.
 
+After upserting, it RECONCILES: lines no longer present in Sage's flagged set
+(e.g. a line whose article was changed — Sage replaces it with a new line
+number) are deleted, so the dashboard doesn't accumulate orphans. Deletion is
+guarded so an empty or implausibly small Sage read can never wipe the table.
+
 Config comes from a .env file next to this script — no secrets in code.
 Use a READ-ONLY Sage login in production. Exit code 0 = success, 1 = failure.
 """
@@ -69,18 +74,56 @@ RUN_OK = ("INSERT INTO sync_runs (started_at, finished_at, rows_upserted, ok, er
 RUN_ERR = ("INSERT INTO sync_runs (started_at, finished_at, rows_upserted, ok, error)"
            " VALUES (%s, now(), 0, false, %s)")
 
+# Reconcile safety: never delete more than this share of the table in one run,
+# and never fewer than this floor of rows — a bad/partial Sage read that would
+# orphan most lines is skipped and logged instead of silently wiping data.
+RECONCILE_MAX_FRACTION = 0.40
+RECONCILE_MIN_FLOOR = 25
+
+
+def reconcile(cur) -> int:
+    """Delete lines not touched by this run's UPSERT. Every current line just
+    got synced_at = now() (constant within this transaction), so a NULL or
+    older synced_at means the line is gone from Sage. Guarded against mass
+    deletion. Returns the number removed."""
+    stale, total = cur.execute(
+        "SELECT count(*) FILTER (WHERE synced_at IS NULL OR synced_at < now()), "
+        "count(*) FROM parts"
+    ).fetchone()
+    if stale == 0:
+        return 0
+    limit = max(RECONCILE_MIN_FLOOR, int(total * RECONCILE_MAX_FRACTION))
+    if stale > limit:
+        log.warning(
+            "reconcile SKIPPED: %d/%d lines look stale (over safety limit %d) — "
+            "not deleting; check the Sage read before trusting this run", stale, total, limit,
+        )
+        return 0
+    gone = cur.execute(
+        "DELETE FROM parts WHERE synced_at IS NULL OR synced_at < now() "
+        "RETURNING poh_num, poh_line"
+    ).fetchall()
+    for pn, pl in gone:
+        log.info("reconcile removed stale line %s / %s", pn, pl)
+    return len(gone)
+
 
 def main() -> int:
     started = datetime.now(timezone.utc)
     try:
         with pyodbc.connect(SAGE_CONN, timeout=30) as sc:
             rows = [tuple(r) for r in sc.cursor().execute(QUERY).fetchall()]
+        removed = 0
         with psycopg.connect(PG_CONN, connect_timeout=15) as pg:
             with pg.cursor() as cur:
                 cur.executemany(UPSERT, rows)
+                # only reconcile when we actually read flagged lines — an empty
+                # read is treated as a failure, never as "delete everything"
+                if rows:
+                    removed = reconcile(cur)
             pg.execute(RUN_OK, (started, len(rows)))
             pg.commit()
-        log.info("synced %d PO line(s)", len(rows))
+        log.info("synced %d PO line(s), removed %d stale line(s)", len(rows), removed)
         return 0
     except Exception as e:
         log.exception("sync failed")
