@@ -28,6 +28,26 @@ SNAPSHOT_DIM = """
 """
 OPEN_WHERE = "WHERE status IS NULL OR status <> ALL(%(closed)s)"
 
+# Delay evolution: how many lines are past their expected receipt date, split
+# by how late they are. Reads parts_dashboard because delay_days is computed
+# there (same definition the dashboard's Delayed tab uses).
+SNAPSHOT_DELAY = """
+    INSERT INTO status_snapshot (snap_date, dimension, scope, bucket, count)
+    SELECT CURRENT_DATE, 'delay', %(scope)s, bucket, count(*)
+    FROM (
+        SELECT CASE
+                 WHEN delay_days <= 7  THEN '1-7 days'
+                 WHEN delay_days <= 30 THEN '8-30 days'
+                 ELSE '31+ days'
+               END AS bucket
+        FROM parts_dashboard
+        WHERE delay_days > 0
+        {and_open}
+    ) t
+    GROUP BY bucket
+"""
+AND_OPEN = "AND (status IS NULL OR status <> ALL(%(closed)s))"
+
 
 def rebuild_today() -> None:
     """Replace today's snapshot with the current parts distribution, in both
@@ -45,6 +65,10 @@ def rebuild_today() -> None:
                 SNAPSHOT_DIM.format(col=dim, where=OPEN_WHERE),
                 {**params, "dim": dim, "scope": "open"},
             )
+        # 'all' = everything past due (incl. lines since closed);
+        # 'open' = still-open late lines, matching the Delayed tab
+        conn.execute(SNAPSHOT_DELAY.format(and_open=""), {**params, "scope": "all"})
+        conn.execute(SNAPSHOT_DELAY.format(and_open=AND_OPEN), {**params, "scope": "open"})
         conn.commit()
 
 

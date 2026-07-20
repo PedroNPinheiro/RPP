@@ -34,16 +34,36 @@ export const PRIORITY_COLORS: Record<string, string> = {
   "P4 - Low": "#64748b",
 };
 
+/* How late a line is. Escalating warning -> serious -> critical, so the chart
+   reads as severity at a glance (buckets must match SNAPSHOT_DELAY in
+   backend/app/routers/analytics.py). */
+export const DELAY_ORDER = ["1-7 days", "8-30 days", "31+ days"];
+export const DELAY_COLORS: Record<string, string> = {
+  "1-7 days": "#eda100",
+  "8-30 days": "#eb6834",
+  "31+ days": "#d03b3b",
+};
+
 const OTHER_COLOR = "#8a94a6";
-export type Dim = "status" | "priority";
+export type Dim = "status" | "priority" | "delay";
+
+const DIM_COLORS: Record<Dim, Record<string, string>> = {
+  status: STATUS_COLORS,
+  priority: PRIORITY_COLORS,
+  delay: DELAY_COLORS,
+};
+const DIM_ORDER: Record<Dim, string[]> = {
+  status: STATUS_ORDER,
+  priority: PRIORITY_ORDER,
+  delay: DELAY_ORDER,
+};
 
 export function colorFor(dim: Dim, bucket: string): string {
-  const map = dim === "status" ? STATUS_COLORS : PRIORITY_COLORS;
-  return map[bucket] ?? OTHER_COLOR;
+  return DIM_COLORS[dim][bucket] ?? OTHER_COLOR;
 }
 
 function orderBuckets(dim: Dim, present: string[]): string[] {
-  const canonical = dim === "status" ? STATUS_ORDER : PRIORITY_ORDER;
+  const canonical = DIM_ORDER[dim];
   const known = canonical.filter((b) => present.includes(b));
   const extras = present.filter((b) => !canonical.includes(b)).sort();
   return [...known, ...extras];
@@ -183,7 +203,12 @@ export function pivotSnapshots(
   scope: SnapScope = "all",
 ): { dates: string[]; series: LineSeries[] } {
   const filt = rows.filter((r) => r.dimension === dim && r.scope === scope);
-  const dates = [...new Set(filt.map((r) => r.snap_date))].sort();
+  // date axis spans every snapshot day in scope, not just the days this
+  // dimension has rows for — so "zero delayed today" plots as 0 rather than
+  // silently dropping the day
+  const dates = [
+    ...new Set(rows.filter((r) => r.scope === scope).map((r) => r.snap_date)),
+  ].sort();
   const lookup = new Map(filt.map((r) => [`${r.snap_date}|${r.bucket}`, r.count]));
   const buckets = orderBuckets(dim, [...new Set(filt.map((r) => r.bucket))]);
   const series = buckets.map((b) => ({

@@ -120,6 +120,7 @@ export function Analytics({ parts, loading }: Props) {
   );
   const statusHist = useMemo(() => pivotSnapshots(histRows, "status", histScope), [histRows, histScope]);
   const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority", histScope), [histRows, histScope]);
+  const delayHist = useMemo(() => pivotSnapshots(histRows, "delay", histScope), [histRows, histScope]);
 
   // KPIs (respond to filters)
   const openCount = filtered.filter((p) => !isClosed(p)).length;
@@ -299,6 +300,16 @@ export function Analytics({ parts, loading }: Props) {
           dates={priorityHist.dates}
           series={priorityHist.series}
           emptyText={snapFailed ? "Couldn't load history — check the backend log." : undefined}
+        />
+        <LineChart
+          title="Delayed Lines — by how late"
+          dates={delayHist.dates}
+          series={delayHist.series}
+          emptyText={
+            snapFailed
+              ? "Couldn't load history — check the backend log."
+              : "No history yet — snapshots start today and build daily."
+          }
         />
       </div>
     </>
