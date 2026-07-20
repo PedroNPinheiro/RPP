@@ -71,9 +71,11 @@ export function summaryByField(parts: Part[], dim: Dim): Bar[] {
 }
 
 /* ---- historical snapshots ---- */
+export type SnapScope = "all" | "open";
 export interface SnapshotRow {
   snap_date: string;
   dimension: Dim;
+  scope: SnapScope;
   bucket: string;
   count: number;
 }
@@ -178,8 +180,9 @@ export function summarize(parts: Part[], dim: DimKey, measure: Measure): Bar[] {
 export function pivotSnapshots(
   rows: SnapshotRow[],
   dim: Dim,
+  scope: SnapScope = "all",
 ): { dates: string[]; series: LineSeries[] } {
-  const filt = rows.filter((r) => r.dimension === dim);
+  const filt = rows.filter((r) => r.dimension === dim && r.scope === scope);
   const dates = [...new Set(filt.map((r) => r.snap_date))].sort();
   const lookup = new Map(filt.map((r) => [`${r.snap_date}|${r.bucket}`, r.count]));
   const buckets = orderBuckets(dim, [...new Set(filt.map((r) => r.bucket))]);

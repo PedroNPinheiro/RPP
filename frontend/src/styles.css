@@ -1348,6 +1348,17 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
   color: var(--ink-3);
   margin: 18px 0 10px;
 }
+/* section header with a control on the right (history open/all toggle) */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-head .section-label { margin-bottom: 10px; }
+.seg-sm { height: 30px; }
+.seg-sm button { height: 22px; font-size: 12px; padding: 0 10px; }
 
 /* ---------- analytics explorer grid ---------- */
 .explore-grid {

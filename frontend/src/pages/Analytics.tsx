@@ -7,6 +7,7 @@ import {
   pivotSnapshots,
   type DimKey,
   type Measure,
+  type SnapScope,
   type SnapshotResponse,
 } from "../charts";
 import { fmtEUR } from "../analytics";
@@ -57,6 +58,7 @@ export function Analytics({ parts, loading }: Props) {
   const [range, setRange] = useState<RangeKey>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [histScope, setHistScope] = useState<SnapScope>("open");
 
   // date window as ISO bounds; lines filter on po_date, history on snap day
   const bounds = useMemo(() => {
@@ -116,8 +118,8 @@ export function Analytics({ parts, loading }: Props) {
     () => (snap?.rows ?? []).filter((r) => inBounds(r.snap_date)),
     [snap, inBounds],
   );
-  const statusHist = useMemo(() => pivotSnapshots(histRows, "status"), [histRows]);
-  const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority"), [histRows]);
+  const statusHist = useMemo(() => pivotSnapshots(histRows, "status", histScope), [histRows, histScope]);
+  const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority", histScope), [histRows, histScope]);
 
   // KPIs (respond to filters)
   const openCount = filtered.filter((p) => !isClosed(p)).length;
@@ -269,9 +271,21 @@ export function Analytics({ parts, loading }: Props) {
         </div>
       </div>
 
-      {/* history — all lines, accumulates daily; date range scopes the days */}
-      <div className="section-label">
-        History (open lines · one point per day{bounds.min || bounds.max ? " · date-filtered" : ""})
+      {/* history — accumulates daily; date range scopes the days; scope toggles
+          between open-only (backlog trend) and every line */}
+      <div className="section-head">
+        <div className="section-label">
+          History ({histScope === "open" ? "open" : "all"} lines · one point per day
+          {bounds.min || bounds.max ? " · date-filtered" : ""})
+        </div>
+        <div className="seg seg-sm">
+          <button className={histScope === "open" ? "on" : ""} onClick={() => setHistScope("open")}>
+            Open only
+          </button>
+          <button className={histScope === "all" ? "on" : ""} onClick={() => setHistScope("all")}>
+            All lines
+          </button>
+        </div>
       </div>
       <div className="charts-grid">
         <LineChart

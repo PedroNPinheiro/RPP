@@ -10,33 +10,40 @@ router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 NONE_BUCKET = "(no status)"
 
-# Closed = completed or cancelled. The history tracks OPEN lines only, so the
-# trend shows the live backlog (e.g. open P1s) instead of an ever-growing
-# cumulative total that never comes down as work finishes.
+# Closed = completed or cancelled. Each day we record TWO scopes so the
+# history can be viewed either way: 'all' (every line) and 'open' (excludes
+# closed) — the 'open' trend shows the live backlog instead of an
+# ever-growing cumulative total.
 CLOSED_STATUSES = ("Completo", "Cancelado")
 
-# rebuild today's snapshot for both dimensions from the current parts;
 # one statement per execute — psycopg's parameterized queries use prepared
-# statements, which reject multiple commands in a single call
+# statements, which reject multiple commands in a single call. {where} is a
+# trusted literal (never user input), filled per scope below.
 SNAPSHOT_DIM = """
-    INSERT INTO status_snapshot (snap_date, dimension, bucket, count)
-    SELECT CURRENT_DATE, %(dim)s, COALESCE(NULLIF({col}, ''), %(none)s), count(*)
+    INSERT INTO status_snapshot (snap_date, dimension, scope, bucket, count)
+    SELECT CURRENT_DATE, %(dim)s, %(scope)s, COALESCE(NULLIF({col}, ''), %(none)s), count(*)
     FROM parts
-    WHERE status IS NULL OR status <> ALL(%(closed)s)
+    {where}
     GROUP BY COALESCE(NULLIF({col}, ''), %(none)s)
 """
+OPEN_WHERE = "WHERE status IS NULL OR status <> ALL(%(closed)s)"
 
 
 def rebuild_today() -> None:
-    """Replace today's snapshot with the current parts distribution.
-    Idempotent — also run hourly by the background task in main.py so
+    """Replace today's snapshot with the current parts distribution, in both
+    scopes. Idempotent — also run hourly by the background task in main.py so
     history has no gaps on days nobody opens Analytics."""
+    params = {"none": NONE_BUCKET, "closed": list(CLOSED_STATUSES)}
     with pool.connection() as conn:
         conn.execute("DELETE FROM status_snapshot WHERE snap_date = CURRENT_DATE")
         for dim in ("status", "priority"):  # dimension name == column name
             conn.execute(
-                SNAPSHOT_DIM.format(col=dim),
-                {"dim": dim, "none": NONE_BUCKET, "closed": list(CLOSED_STATUSES)},
+                SNAPSHOT_DIM.format(col=dim, where=""),
+                {**params, "dim": dim, "scope": "all"},
+            )
+            conn.execute(
+                SNAPSHOT_DIM.format(col=dim, where=OPEN_WHERE),
+                {**params, "dim": dim, "scope": "open"},
             )
         conn.commit()
 
@@ -48,8 +55,8 @@ def snapshots(user: dict = Depends(get_current_user)):
     with pool.connection() as conn:
         conn.row_factory = dict_row
         rows = conn.execute(
-            "SELECT snap_date, dimension, bucket, count "
-            "FROM status_snapshot ORDER BY snap_date, dimension, bucket"
+            "SELECT snap_date, dimension, scope, bucket, count "
+            "FROM status_snapshot ORDER BY snap_date, dimension, scope, bucket"
         ).fetchall()
     return {
         "today": date.today().isoformat(),

@@ -99,9 +99,10 @@ CREATE INDEX IF NOT EXISTS idx_attach_part ON part_attachments (part_id);
 CREATE TABLE IF NOT EXISTS status_snapshot (
     snap_date DATE NOT NULL,
     dimension TEXT NOT NULL,   -- 'status' | 'priority'
+    scope     TEXT NOT NULL DEFAULT 'all',  -- 'all' | 'open' (excludes closed)
     bucket    TEXT NOT NULL,
     count     INTEGER NOT NULL,
-    PRIMARY KEY (snap_date, dimension, bucket)
+    PRIMARY KEY (snap_date, dimension, scope, bucket)
 );
 
 -- Sync run log — so we can see freshness / failures on the dashboard.
