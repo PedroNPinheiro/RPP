@@ -24,6 +24,16 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [fitW, setFitW] = useState(0);
+  // legend click isolates/restores a series; empty set = everything shown
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const toggle = (name: string) =>
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  const visible = series.filter((s) => !hidden.has(s.name));
 
   const n = dates.length;
   const hasData = n > 0;
@@ -42,7 +52,9 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   const width = M.left + plotW + M.right;
   const height = M.top + PLOT_H + M.bottom;
 
-  const max = niceMax(Math.max(1, ...series.flatMap((s) => s.values)));
+  // scale to what's actually shown, so isolating a small series doesn't
+  // leave it looking tiny against the full-set axis
+  const max = niceMax(Math.max(1, ...visible.flatMap((s) => s.values)));
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => t * max);
   const xOf = (i: number) => (n <= 1 ? M.left + plotW / 2 : M.left + (i / (n - 1)) * plotW);
   const yOf = (v: number) => M.top + PLOT_H - (v / max) * PLOT_H;
@@ -63,18 +75,40 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
       <div className="chart-head">
         <h3>{title}</h3>
         <div className="legend">
-          {series.map((s) => (
-            <span key={s.name} className="legend-item">
-              <span className="legend-dot" style={{ background: s.color }} />
-              {s.name}
-            </span>
-          ))}
+          {series.map((s) => {
+            const off = hidden.has(s.name);
+            return (
+              <button
+                key={s.name}
+                type="button"
+                className={`legend-item legend-btn${off ? " off" : ""}`}
+                aria-pressed={!off}
+                title={off ? `Show ${s.name}` : `Hide ${s.name}`}
+                onClick={() => toggle(s.name)}
+              >
+                <span className="legend-dot" style={{ background: s.color }} />
+                {s.name}
+              </button>
+            );
+          })}
+          {hidden.size > 0 && (
+            <button type="button" className="legend-reset" onClick={() => setHidden(new Set())}>
+              Show all
+            </button>
+          )}
         </div>
       </div>
 
       {n === 0 ? (
         <div className="chart-empty">
           {emptyText ?? "No history yet — snapshots start today and build daily."}
+        </div>
+      ) : visible.length === 0 ? (
+        <div className="chart-empty">
+          All series hidden —{" "}
+          <button type="button" className="legend-reset inline" onClick={() => setHidden(new Set())}>
+            show all
+          </button>
         </div>
       ) : (
         <div className="chart-scroll" ref={scrollRef}>
@@ -130,7 +164,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
               )}
 
               {/* series */}
-              {series.map((s) => {
+              {visible.map((s) => {
                 const d = s.values
                   .map((v, i) => `${i === 0 ? "M" : "L"}${xOf(i)},${yOf(v)}`)
                   .join(" ");
@@ -158,7 +192,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                 style={{ left: Math.min(xOf(hover), width - 100), top: M.top }}
               >
                 <div className="tt-title">{fmtDate(dates[hover])}</div>
-                {series.map((s) => (
+                {visible.map((s) => (
                   <div key={s.name} className="tt-row">
                     <span className="legend-dot" style={{ background: s.color }} />
                     <span className="tt-name">{s.name}</span>
