@@ -26,6 +26,8 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   const [fitW, setFitW] = useState(0);
   // legend click isolates/restores a series; empty set = everything shown
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  // legend hover spotlights one series without changing what's shown
+  const [spot, setSpot] = useState<string | null>(null);
   const toggle = (name: string) =>
     setHidden((prev) => {
       const next = new Set(prev);
@@ -83,8 +85,10 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                 type="button"
                 className={`legend-item legend-btn${off ? " off" : ""}`}
                 aria-pressed={!off}
-                title={off ? `Show ${s.name}` : `Hide ${s.name}`}
+                title={off ? `Show ${s.name}` : `Click to hide · hover to spotlight`}
                 onClick={() => toggle(s.name)}
+                onMouseEnter={() => !off && setSpot(s.name)}
+                onMouseLeave={() => setSpot(null)}
               >
                 <span className="legend-dot" style={{ background: s.color }} />
                 {s.name}
@@ -163,27 +167,38 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
                 />
               )}
 
-              {/* series */}
-              {visible.map((s) => {
-                const d = s.values
-                  .map((v, i) => `${i === 0 ? "M" : "L"}${xOf(i)},${yOf(v)}`)
-                  .join(" ");
-                return (
-                  <g key={s.name}>
-                    <path d={d} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-                    {/* point markers so sparse history (esp. a single day) is
-                        visible; the surface ring keeps overlapping dots apart.
-                        hidden once the line is dense enough to carry itself */}
-                    {n <= 48 &&
-                      s.values.map((v, i) => (
-                        <circle key={i} cx={xOf(i)} cy={yOf(v)} r={3} fill={s.color} className="pt-marker" />
-                      ))}
-                    {hover !== null && (
-                      <circle cx={xOf(hover)} cy={yOf(s.values[hover])} r={3.5} fill={s.color} className="dot-ring" />
-                    )}
-                  </g>
-                );
-              })}
+              {/* series — spotlighted one drawn last so it sits on top */}
+              {[...visible]
+                .sort((a, b) => (a.name === spot ? 1 : 0) - (b.name === spot ? 1 : 0))
+                .map((s) => {
+                  const isSpot = spot === s.name;
+                  const dim = spot !== null && !isSpot;
+                  const d = s.values
+                    .map((v, i) => `${i === 0 ? "M" : "L"}${xOf(i)},${yOf(v)}`)
+                    .join(" ");
+                  return (
+                    <g key={s.name} opacity={dim ? 0.14 : 1} style={{ transition: "opacity 0.12s ease" }}>
+                      <path
+                        d={d}
+                        fill="none"
+                        stroke={s.color}
+                        strokeWidth={isSpot ? 3.25 : 2}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                      {/* point markers so sparse history (esp. a single day) is
+                          visible; the surface ring keeps overlapping dots apart.
+                          hidden once the line is dense enough to carry itself */}
+                      {n <= 48 &&
+                        s.values.map((v, i) => (
+                          <circle key={i} cx={xOf(i)} cy={yOf(v)} r={isSpot ? 3.75 : 3} fill={s.color} className="pt-marker" />
+                        ))}
+                      {hover !== null && (
+                        <circle cx={xOf(hover)} cy={yOf(s.values[hover])} r={3.5} fill={s.color} className="dot-ring" />
+                      )}
+                    </g>
+                  );
+                })}
             </svg>
 
             {hover !== null && (
