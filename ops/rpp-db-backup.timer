@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly full RPP database backup
+
+[Timer]
+# 02:00 every day; catch up on next boot if the machine was off
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Full backup of the RPP database + attachment files
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+# runs as root so it can `sudo -u postgres pg_dump` and read uploads/
+ExecStart=/opt/rpp/ops/backup_db.sh
