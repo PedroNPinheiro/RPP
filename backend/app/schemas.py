@@ -46,6 +46,7 @@ class Part(BaseModel):
     eta_pc: Optional[date] = None
     drawings_required: Optional[bool] = None
     drawings_desc: Optional[str] = None
+    drawings_done: Optional[bool] = None
     dest_type: Optional[str] = None
     real_ship_date: Optional[date] = None
     shipping_method: Optional[str] = None
@@ -87,6 +88,7 @@ class PartUpdate(BaseModel):
     eta_pc: Optional[date] = None
     drawings_required: Optional[bool] = None
     drawings_desc: Optional[str] = None
+    drawings_done: Optional[bool] = None
     dest_type: Optional[str] = None
     real_ship_date: Optional[date] = None
     shipping_method: Optional[str] = None

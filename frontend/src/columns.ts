@@ -86,6 +86,7 @@ export const COLUMNS: Col[] = [
   { key: "eta_pc", label: "ETA PC", type: "date", group: "team", editable: true },
   { key: "drawings_required", label: "Drawings?", type: "bool", group: "team", editable: true },
   { key: "drawings_desc", label: "Drawings Desc", type: "text", group: "team", editable: true },
+  { key: "drawings_done", label: "Drawing concluded", type: "bool", group: "team", editable: true },
   { key: "tracking", label: "Tracking", type: "text", group: "team", editable: true },
   { key: "notes", label: "Notes", type: "text", group: "team", editable: true, ellipsis: true },
 ];
@@ -119,7 +120,7 @@ export const DETAIL_GROUPS: { title: string; keys: (keyof Part)[] }[] = [
       "estimated_date", "required_ship", "real_ship_date", "eta_pc",
     ],
   },
-  { title: "Drawings", keys: ["drawings_required", "drawings_desc"] },
+  { title: "Drawings", keys: ["drawings_required", "drawings_desc", "drawings_done"] },
   { title: "Notes", keys: ["notes"] },
 ];
 

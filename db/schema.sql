@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS parts (
     eta_pc              DATE,                -- ETA PC
     drawings_required   BOOLEAN,             -- Drawings Required?
     drawings_desc       TEXT,                -- Drawings Desc
+    drawings_done       BOOLEAN,             -- Drawing concluded (engineering)
     dest_type           TEXT,                -- DEST TYPE (CSS-Stock / CSR-Replacement)
     real_ship_date      DATE,                -- Real Ship Date
     shipping_method     TEXT,                -- Shipping Method

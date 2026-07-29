@@ -41,6 +41,7 @@ export interface Part {
   eta_pc: string | null;
   drawings_required: boolean | null;
   drawings_desc: string | null;
+  drawings_done: boolean | null;
   dest_type: string | null;
   real_ship_date: string | null;
   shipping_method: string | null;
