@@ -29,6 +29,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [area, setArea] = useState("");
+  const [drawingsOnly, setDrawingsOnly] = useState(false);
   const [grouped, setGrouped] = useState(true);
   const [groupOrder, setGroupOrder] = useState<GroupOrder>("po");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -82,6 +83,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
     if (view === "cancelled") rows = rows.filter(isCancelled);
     if (category) rows = rows.filter((p) => (p.category || "") === category);
     if (area) rows = rows.filter((p) => (p.area || "") === area);
+    if (drawingsOnly) rows = rows.filter((p) => p.drawings_required);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter((p) =>
@@ -91,7 +93,7 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
       );
     }
     return rows;
-  }, [parts, view, search, category, area]);
+  }, [parts, view, search, category, area, drawingsOnly]);
 
   const counts = useMemo(
     () => ({
@@ -164,6 +166,13 @@ export function Dashboard({ parts, loading, onPatch, onBulkPatch }: Props) {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+          <button
+            className={`btn${drawingsOnly ? " btn-on" : ""}`}
+            onClick={() => setDrawingsOnly((d) => !d)}
+            title="Show only lines flagged as needing drawings"
+          >
+            ✎ Drawings
+          </button>
           <button
             className={`btn${grouped ? " btn-on" : ""}`}
             onClick={() => setGrouped((g) => !g)}
