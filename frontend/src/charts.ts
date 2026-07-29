@@ -53,20 +53,30 @@ export const DRAWINGS_COLORS: Record<string, string> = {
   Concluded: "#0ca30c",
 };
 
+/* Área over time — the team's two work streams. Buckets are the raw área
+   values ("(no área)" for unset, coloured neutral via the fallback). */
+export const AREA_ORDER = ["Produção", "Logística"];
+export const AREA_COLORS: Record<string, string> = {
+  "Produção": "#2a78d6",
+  "Logística": "#1baf7a",
+};
+
 const OTHER_COLOR = "#8a94a6";
-export type Dim = "status" | "priority" | "delay" | "drawings";
+export type Dim = "status" | "priority" | "delay" | "drawings" | "area";
 
 const DIM_COLORS: Record<Dim, Record<string, string>> = {
   status: STATUS_COLORS,
   priority: PRIORITY_COLORS,
   delay: DELAY_COLORS,
   drawings: DRAWINGS_COLORS,
+  area: AREA_COLORS,
 };
 const DIM_ORDER: Record<Dim, string[]> = {
   status: STATUS_ORDER,
   priority: PRIORITY_ORDER,
   delay: DELAY_ORDER,
   drawings: DRAWINGS_ORDER,
+  area: AREA_ORDER,
 };
 
 export function colorFor(dim: Dim, bucket: string): string {

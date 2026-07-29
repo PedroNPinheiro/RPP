@@ -70,14 +70,17 @@ def rebuild_today() -> None:
     params = {"none": NONE_BUCKET, "closed": list(CLOSED_STATUSES)}
     with pool.connection() as conn:
         conn.execute("DELETE FROM status_snapshot WHERE snap_date = CURRENT_DATE")
-        for dim in ("status", "priority"):  # dimension name == column name
+        # dimension name == the parts column grouped on. 'area' gets its own
+        # "no value" label; status/priority keep the shared NONE_BUCKET.
+        for dim in ("status", "priority", "area"):
+            none = "(no área)" if dim == "area" else NONE_BUCKET
             conn.execute(
                 SNAPSHOT_DIM.format(col=dim, where=""),
-                {**params, "dim": dim, "scope": "all"},
+                {**params, "dim": dim, "scope": "all", "none": none},
             )
             conn.execute(
                 SNAPSHOT_DIM.format(col=dim, where=OPEN_WHERE),
-                {**params, "dim": dim, "scope": "open"},
+                {**params, "dim": dim, "scope": "open", "none": none},
             )
         # 'all' = everything past due (incl. lines since closed);
         # 'open' = still-open late lines, matching the Delayed tab

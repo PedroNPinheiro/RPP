@@ -122,6 +122,7 @@ export function Analytics({ parts, loading }: Props) {
   const priorityHist = useMemo(() => pivotSnapshots(histRows, "priority", histScope), [histRows, histScope]);
   const delayHist = useMemo(() => pivotSnapshots(histRows, "delay", histScope), [histRows, histScope]);
   const drawingsHist = useMemo(() => pivotSnapshots(histRows, "drawings", histScope), [histRows, histScope]);
+  const areaHist = useMemo(() => pivotSnapshots(histRows, "area", histScope), [histRows, histScope]);
 
   // KPIs (respond to filters)
   const openCount = filtered.filter((p) => !isClosed(p)).length;
@@ -319,12 +320,22 @@ export function Analytics({ parts, loading }: Props) {
           }
         />
       </div>
-      {/* drawings on its own row, medium width */}
-      <div className="chart-solo">
+      {/* drawings + área side by side on their own row */}
+      <div className="charts-grid">
         <LineChart
           title="Drawings — pending vs concluded"
           dates={drawingsHist.dates}
           series={drawingsHist.series}
+          emptyText={
+            snapFailed
+              ? "Couldn't load history — check the backend log."
+              : "No history yet — snapshots start today and build daily."
+          }
+        />
+        <LineChart
+          title="Área History"
+          dates={areaHist.dates}
+          series={areaHist.series}
           emptyText={
             snapFailed
               ? "Couldn't load history — check the backend log."

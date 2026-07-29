@@ -1410,9 +1410,6 @@ tr.line-row:hover .pill-select.sel-empty { border-color: var(--ring); background
   margin-bottom: 10px;
   max-width: 60ch;
 }
-/* a single chart on its own row — medium width, not stretched full-bleed */
-.chart-solo { margin-top: 14px; }
-.chart-solo > .chart-card { max-width: 820px; }
 .seg-sm { height: 30px; }
 .seg-sm button { height: 22px; font-size: 12px; padding: 0 10px; }
 
