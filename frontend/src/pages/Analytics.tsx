@@ -52,7 +52,7 @@ export function Analytics({ parts, loading }: Props) {
   const [snap, setSnap] = useState<SnapshotResponse | null>(null);
   const [snapFailed, setSnapFailed] = useState(false);
   const [filters, setFilters] = useState<Partial<Record<DimKey, string>>>({});
-  const [completion, setCompletion] = useState<Completion>("all");
+  const [completion, setCompletion] = useState<Completion>("open");
   const [groupBy, setGroupBy] = useState<DimKey>("status");
   const [measure, setMeasure] = useState<Measure>("count");
   const [range, setRange] = useState<RangeKey>("all");
@@ -276,9 +276,15 @@ export function Analytics({ parts, loading }: Props) {
       {/* history — accumulates daily; date range scopes the days; scope toggles
           between open-only (backlog trend) and every line */}
       <div className="section-head">
-        <div className="section-label">
-          History ({histScope === "open" ? "open" : "all"} lines · one point per day
-          {bounds.min || bounds.max ? " · date-filtered" : ""})
+        <div>
+          <div className="section-label">
+            History ({histScope === "open" ? "open" : "all"} lines · one point per day
+            {bounds.min || bounds.max ? " · date-filtered" : ""})
+          </div>
+          <div className="section-note">
+            Whole dataset over time — scoped only by date range and this toggle,
+            not the Supplier/Área/Category filters above.
+          </div>
         </div>
         <div className="seg seg-sm">
           <button className={histScope === "open" ? "on" : ""} onClick={() => setHistScope("open")}>
