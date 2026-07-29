@@ -312,6 +312,9 @@ export function Analytics({ parts, loading }: Props) {
               : "No history yet — snapshots start today and build daily."
           }
         />
+      </div>
+      {/* drawings on its own full-width row */}
+      <div className="charts-grid">
         <LineChart
           title="Drawings — pending vs concluded"
           dates={drawingsHist.dates}
