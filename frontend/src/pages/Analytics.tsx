@@ -313,8 +313,8 @@ export function Analytics({ parts, loading }: Props) {
           }
         />
       </div>
-      {/* drawings on its own full-width row */}
-      <div className="charts-grid">
+      {/* drawings on its own row, medium width */}
+      <div className="chart-solo">
         <LineChart
           title="Drawings — pending vs concluded"
           dates={drawingsHist.dates}

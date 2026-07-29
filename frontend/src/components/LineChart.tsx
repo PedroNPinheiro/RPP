@@ -53,7 +53,10 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   }, [hasData]);
 
   const plotH = maximized ? Math.max(420, Math.round(window.innerHeight * 0.55)) : PLOT_H;
-  const plotW = Math.max((n - 1) * (maximized ? 90 : 60), fitW - M.left - M.right - 2, 200);
+  // fit the card (no horizontal scroll, newest point always in view); the
+  // maximized overlay is the only place we spread points out and let it scroll
+  const fitPlotW = Math.max(fitW - M.left - M.right - 2, 200);
+  const plotW = maximized ? Math.max((n - 1) * 90, fitPlotW) : fitPlotW;
   const width = M.left + plotW + M.right;
   const height = M.top + plotH + M.bottom;
 
