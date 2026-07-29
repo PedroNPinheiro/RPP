@@ -12,10 +12,6 @@ from .config import settings
 log = logging.getLogger("rpp")
 
 
-def drawings_notify_enabled() -> bool:
-    return bool(settings.smtp_user and settings.smtp_password and settings.notify_drawings_to)
-
-
 def _fmt(v) -> str:
     return "—" if v is None or v == "" else str(v)
 
@@ -37,19 +33,24 @@ def _line_block(row: dict) -> str:
     )
 
 
-def send_drawings_notification(rows: list[dict], changed_by: str) -> None:
-    """One email covering every line whose 'Drawings?' box was just ticked."""
+def _recipients(raw: str) -> list[str]:
+    return [a.strip() for a in raw.split(",") if a.strip()]
+
+
+def _send(rows: list[dict], changed_by: str, *, subject_verb: str, intro: str,
+          to: str, bcc: str) -> None:
+    """Build and send one email covering every affected line. Never raises."""
     try:
         if len(rows) == 1:
-            subject = f"Drawings required: {rows[0]['poh_num']} · {rows[0].get('item_code', '')}"
+            subject = f"{subject_verb}: {rows[0]['poh_num']} · {rows[0].get('item_code', '')}"
         else:
-            subject = f"Drawings required: {len(rows)} lines"
+            subject = f"{subject_verb}: {len(rows)} lines"
 
         blocks = "\n\n----------------------------------------\n\n".join(
             _line_block(r) for r in rows
         )
         body = (
-            f"The 'Drawings required' box was ticked by {changed_by}.\n\n"
+            f"{intro} by {changed_by}.\n\n"
             f"{blocks}\n\n"
             f"Open the dashboard: {settings.app_base_url}\n"
         )
@@ -57,19 +58,51 @@ def send_drawings_notification(rows: list[dict], changed_by: str) -> None:
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = settings.smtp_user
-        msg["To"] = ", ".join(a.strip() for a in settings.notify_drawings_to.split(",") if a.strip())
-        if settings.notify_drawings_bcc:
+        msg["To"] = ", ".join(_recipients(to))
+        if bcc:
             # smtplib.send_message adds Bcc to the envelope but strips the
             # header, so recipients never see the copy
-            msg["Bcc"] = ", ".join(
-                a.strip() for a in settings.notify_drawings_bcc.split(",") if a.strip()
-            )
+            msg["Bcc"] = ", ".join(_recipients(bcc))
         msg.set_content(body)
 
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as s:
             s.starttls()
             s.login(settings.smtp_user, settings.smtp_password)
             s.send_message(msg)
-        log.info("drawings notification sent for %d line(s)", len(rows))
+        log.info("notification '%s' sent for %d line(s)", subject_verb, len(rows))
     except Exception:
-        log.exception("drawings notification failed")
+        log.exception("notification '%s' failed", subject_verb)
+
+
+def _smtp_ready() -> bool:
+    return bool(settings.smtp_user and settings.smtp_password)
+
+
+def drawings_notify_enabled() -> bool:
+    return _smtp_ready() and bool(settings.notify_drawings_to)
+
+
+def drawings_done_notify_enabled() -> bool:
+    return _smtp_ready() and bool(settings.notify_drawings_done_to)
+
+
+def send_drawings_notification(rows: list[dict], changed_by: str) -> None:
+    """One email covering every line whose 'Drawings?' box was just ticked."""
+    _send(
+        rows, changed_by,
+        subject_verb="Drawings required",
+        intro="The 'Drawings required' box was ticked",
+        to=settings.notify_drawings_to,
+        bcc=settings.notify_drawings_bcc,
+    )
+
+
+def send_drawings_done_notification(rows: list[dict], changed_by: str) -> None:
+    """One email covering every line just marked 'Drawing concluded'."""
+    _send(
+        rows, changed_by,
+        subject_verb="Drawing concluded",
+        intro="The 'Drawing concluded' box was ticked",
+        to=settings.notify_drawings_done_to,
+        bcc=settings.notify_drawings_done_bcc,
+    )

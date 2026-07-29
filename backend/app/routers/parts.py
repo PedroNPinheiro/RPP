@@ -3,7 +3,12 @@ from psycopg.rows import dict_row
 
 from ..auth import get_current_user, require_editor
 from ..db import pool
-from ..notify import drawings_notify_enabled, send_drawings_notification
+from ..notify import (
+    drawings_done_notify_enabled,
+    drawings_notify_enabled,
+    send_drawings_done_notification,
+    send_drawings_notification,
+)
 from ..schemas import AuditEntry, BulkUpdate, Part, PartUpdate
 
 router = APIRouter(prefix="/api/parts", tags=["parts"])
@@ -77,12 +82,20 @@ def bulk_update(patch: BulkUpdate, tasks: BackgroundTasks, user: dict = Depends(
             (patch.ids,),
         ).fetchall()
 
-    # 'Drawings?' just flipped to Yes on these lines -> notify (post-response)
+    # a box just flipped to Yes on these lines -> notify (post-response). Only
+    # lines where it was previously off, so re-saving doesn't re-send.
+    def _newly_ticked(col: str) -> list[dict]:
+        ids = {r["id"] for r in current_rows if not r[col]}
+        return [dict(r) for r in result if r["id"] in ids]
+
     if fields.get("drawings_required") is True and drawings_notify_enabled():
-        ticked_ids = {r["id"] for r in current_rows if not r["drawings_required"]}
-        ticked = [dict(r) for r in result if r["id"] in ticked_ids]
+        ticked = _newly_ticked("drawings_required")
         if ticked:
             tasks.add_task(send_drawings_notification, ticked, user["email"])
+    if fields.get("drawings_done") is True and drawings_done_notify_enabled():
+        ticked = _newly_ticked("drawings_done")
+        if ticked:
+            tasks.add_task(send_drawings_done_notification, ticked, user["email"])
     return result
 
 
@@ -136,12 +149,13 @@ def update_part(part_id: int, patch: PartUpdate, tasks: BackgroundTasks, user: d
             "SELECT * FROM parts_dashboard WHERE id = %s", (part_id,)
         ).fetchone()
 
-    if (
-        drawings_notify_enabled()
-        and any(col == "drawings_required" and bool(new) and not bool(old)
-                for col, old, new in changes)
-    ):
+    def _flipped_on(field: str) -> bool:
+        return any(c == field and bool(new) and not bool(old) for c, old, new in changes)
+
+    if drawings_notify_enabled() and _flipped_on("drawings_required"):
         tasks.add_task(send_drawings_notification, [dict(final)], user["email"])
+    if drawings_done_notify_enabled() and _flipped_on("drawings_done"):
+        tasks.add_task(send_drawings_done_notification, [dict(final)], user["email"])
     return final
 
 

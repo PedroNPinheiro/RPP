@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     notify_drawings_to: str = ""
     # Optional comma-separated BCC list (envelope-only; header never sent).
     notify_drawings_bcc: str = ""
+    # Same, for the "drawing concluded" alert.
+    notify_drawings_done_to: str = ""
+    notify_drawings_done_bcc: str = ""
 
     @property
     def cors_list(self) -> list[str]:
