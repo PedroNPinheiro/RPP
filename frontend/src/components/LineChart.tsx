@@ -43,14 +43,18 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   const hasData = n > 0;
 
   // stretch the plot to the card; overflow into horizontal scroll only
-  // once the daily points genuinely need more room
+  // once the daily points genuinely need more room. Re-attach when `maximized`
+  // flips: React remounts the scroll node when the card moves in/out of the
+  // overlay, so the observer must re-bind or the width goes stale (needing a
+  // manual refresh) after minimizing.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    setFitW(el.clientWidth); // sync immediately, don't wait for a resize event
     const ro = new ResizeObserver(() => setFitW(el.clientWidth));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [hasData]);
+  }, [hasData, maximized]);
 
   const plotH = maximized ? Math.max(420, Math.round(window.innerHeight * 0.55)) : PLOT_H;
   // fit the card (no horizontal scroll, newest point always in view); the
