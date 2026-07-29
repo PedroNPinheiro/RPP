@@ -44,18 +44,29 @@ export const DELAY_COLORS: Record<string, string> = {
   "31+ days": "#d03b3b",
 };
 
+/* Drawings progress among lines that require a drawing: pending (amber, needs
+   engineering) vs concluded (green). Buckets must match SNAPSHOT_DRAWINGS in
+   backend/app/routers/analytics.py. */
+export const DRAWINGS_ORDER = ["Pending", "Concluded"];
+export const DRAWINGS_COLORS: Record<string, string> = {
+  Pending: "#eda100",
+  Concluded: "#0ca30c",
+};
+
 const OTHER_COLOR = "#8a94a6";
-export type Dim = "status" | "priority" | "delay";
+export type Dim = "status" | "priority" | "delay" | "drawings";
 
 const DIM_COLORS: Record<Dim, Record<string, string>> = {
   status: STATUS_COLORS,
   priority: PRIORITY_COLORS,
   delay: DELAY_COLORS,
+  drawings: DRAWINGS_COLORS,
 };
 const DIM_ORDER: Record<Dim, string[]> = {
   status: STATUS_ORDER,
   priority: PRIORITY_ORDER,
   delay: DELAY_ORDER,
+  drawings: DRAWINGS_ORDER,
 };
 
 export function colorFor(dim: Dim, bucket: string): string {

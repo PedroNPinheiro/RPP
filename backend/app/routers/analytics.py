@@ -48,6 +48,20 @@ SNAPSHOT_DELAY = """
 """
 AND_OPEN = "AND (status IS NULL OR status <> ALL(%(closed)s))"
 
+# Drawings progress: among lines that REQUIRE a drawing, how many are concluded
+# vs still pending. Buckets must match DRAWINGS_ORDER in frontend/src/charts.ts.
+SNAPSHOT_DRAWINGS = """
+    INSERT INTO status_snapshot (snap_date, dimension, scope, bucket, count)
+    SELECT CURRENT_DATE, 'drawings', %(scope)s, bucket, count(*)
+    FROM (
+        SELECT CASE WHEN drawings_done THEN 'Concluded' ELSE 'Pending' END AS bucket
+        FROM parts
+        WHERE drawings_required = true
+        {and_open}
+    ) t
+    GROUP BY bucket
+"""
+
 
 def rebuild_today() -> None:
     """Replace today's snapshot with the current parts distribution, in both
@@ -69,6 +83,9 @@ def rebuild_today() -> None:
         # 'open' = still-open late lines, matching the Delayed tab
         conn.execute(SNAPSHOT_DELAY.format(and_open=""), {**params, "scope": "all"})
         conn.execute(SNAPSHOT_DELAY.format(and_open=AND_OPEN), {**params, "scope": "open"})
+        # drawings-required lines: concluded vs pending ('open' = still-open ones)
+        conn.execute(SNAPSHOT_DRAWINGS.format(and_open=""), {**params, "scope": "all"})
+        conn.execute(SNAPSHOT_DRAWINGS.format(and_open=AND_OPEN), {**params, "scope": "open"})
         conn.commit()
 
 
