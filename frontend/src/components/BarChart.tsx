@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Bar } from "../charts";
+import { niceScale, type Bar } from "../charts";
 import { useMaximize } from "./useMaximize";
 
 interface Props {
@@ -19,13 +19,6 @@ function topRoundedRect(x: number, y: number, w: number, h: number, r: number): 
     `L${x + w},${y + h}`,
     "Z",
   ].join(" ");
-}
-
-function niceMax(v: number): number {
-  if (v <= 0) return 1;
-  const pow = 10 ** Math.floor(Math.log10(v));
-  for (const m of [1, 2, 5, 10]) if (v <= m * pow) return m * pow;
-  return 10 * pow;
 }
 
 const M = { top: 22, right: 12, bottom: 46, left: 52 };
@@ -48,8 +41,7 @@ export function BarChart({ title, bars, format }: Props) {
   const width = M.left + plotW + M.right;
   const height = M.top + plotH + M.bottom;
 
-  const max = niceMax(Math.max(0, ...bars.map((b) => b.value)));
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => t * max);
+  const { max, ticks } = niceScale(Math.max(1, ...bars.map((b) => b.value)));
   const yOf = (v: number) => M.top + plotH - (v / max) * plotH;
 
   return frame(

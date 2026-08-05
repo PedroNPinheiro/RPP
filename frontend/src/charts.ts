@@ -4,6 +4,22 @@ import type { Part } from "./types";
    charts and snapshot history land in the same bucket */
 export const NONE_BUCKET = "(no status)";
 
+/* Axis that hugs the data (shared by the line and bar charts): pick a round
+   step (~`targetTicks` of them) and take the max as the smallest step-multiple
+   ≥ the data. Avoids a peak of 250 rounding up to 500 and wasting half the
+   height. Integer-friendly steps (1/2/5 × 10ⁿ, min 1) keep tick labels whole. */
+export function niceScale(dataMax: number, targetTicks = 5): { max: number; ticks: number[] } {
+  if (dataMax <= 0) return { max: 1, ticks: [0, 1] };
+  const raw = dataMax / targetTicks;
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const norm = raw / pow;
+  const step = Math.max(1, (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * pow);
+  const max = Math.ceil(dataMax / step) * step;
+  const ticks: number[] = [];
+  for (let t = 0; t <= max + step / 1000; t += step) ticks.push(Math.round(t));
+  return { max, ticks };
+}
+
 /* Status/priority colors match the app's status dots so the whole product
    speaks one visual language. Every chart also carries a legend + table,
    which satisfies the colorblind relief rule for the green/red pair. */

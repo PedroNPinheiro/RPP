@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { LineSeries } from "../charts";
+import { niceScale, type LineSeries } from "../charts";
 import { fmtDate } from "../format";
 import { useMaximize } from "./useMaximize";
 
@@ -8,22 +8,6 @@ interface Props {
   dates: string[];
   series: LineSeries[];
   emptyText?: string;
-}
-
-/* Axis that hugs the data: pick a round step (~`targetTicks` of them) and take
-   the max as the smallest step-multiple ≥ the data. Avoids the old behaviour
-   where a peak of 250 rounded all the way up to 500, wasting half the height. */
-function niceScale(dataMax: number, targetTicks = 5): { max: number; ticks: number[] } {
-  if (dataMax <= 0) return { max: 1, ticks: [0, 1] };
-  const raw = dataMax / targetTicks;
-  const pow = 10 ** Math.floor(Math.log10(raw));
-  const norm = raw / pow;
-  // integer-friendly steps (all our data is line counts): 1/2/5 × 10ⁿ, min 1
-  const step = Math.max(1, (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * pow);
-  const max = Math.ceil(dataMax / step) * step;
-  const ticks: number[] = [];
-  for (let t = 0; t <= max + step / 1000; t += step) ticks.push(Math.round(t));
-  return { max, ticks };
 }
 
 const M = { top: 12, right: 16, bottom: 40, left: 40 };
