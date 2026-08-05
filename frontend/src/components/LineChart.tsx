@@ -71,8 +71,14 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
   const xOf = (i: number) => (n <= 1 ? M.left + plotW / 2 : M.left + (i / (n - 1)) * plotW);
   const yOf = (v: number) => M.top + plotH - (v / max) * plotH;
 
-  // thin x labels so they don't collide
-  const labelStep = Math.ceil(n / 8) || 1;
+  // thin x labels by PIXELS, not a fixed count, so they never crowd as days
+  // accumulate. Always show the newest date; drop any tick that would collide
+  // with it (fixes the "04/08 05/08" crush at the right edge).
+  const MIN_LABEL_GAP = 50; // px between date labels
+  const pointGap = n > 1 ? plotW / (n - 1) : plotW;
+  const labelStep = Math.max(1, Math.ceil(MIN_LABEL_GAP / pointGap));
+  const showXLabel = (i: number) =>
+    i === n - 1 || (i % labelStep === 0 && (n - 1 - i) * pointGap >= MIN_LABEL_GAP * 0.8);
 
   const onMove = (e: React.MouseEvent) => {
     const rect = svgRef.current?.getBoundingClientRect();
@@ -154,7 +160,7 @@ export function LineChart({ title, dates, series, emptyText }: Props) {
 
               {/* x labels */}
               {dates.map((d, i) =>
-                i % labelStep === 0 || i === n - 1 ? (
+                showXLabel(i) ? (
                   <text
                     key={d}
                     x={xOf(i)}
