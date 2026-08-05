@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { niceScale, type Bar } from "../charts";
 import { useMaximize } from "./useMaximize";
 
@@ -23,21 +23,34 @@ function topRoundedRect(x: number, y: number, w: number, h: number, r: number): 
 
 const M = { top: 22, right: 12, bottom: 46, left: 52 };
 const PLOT_H = 210;
-const BAR_MAX = 66;
 
 export function BarChart({ title, bars, format }: Props) {
   const { max: maximized, button: maxBtn, frame } = useMaximize();
   const fmt = format ?? ((n: number) => String(Math.round(n)));
   const [hover, setHover] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [fitW, setFitW] = useState(0);
+
+  // measure the card so the bands can spread across the full width (re-attach
+  // on maximize, same as LineChart, since the node remounts into the overlay)
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setFitW(el.clientWidth);
+    const ro = new ResizeObserver(() => setFitW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [maximized]);
 
   const n = Math.max(bars.length, 1);
-  // maximized: taller plot and roomier bands, since there's screen to spare
   const plotH = maximized ? Math.max(420, Math.round(window.innerHeight * 0.55)) : PLOT_H;
-  const bandW = maximized
-    ? Math.min(240, Math.max(110, 1100 / n))
-    : Math.min(150, Math.max(70, 560 / n));
-  const barW = Math.min(maximized ? BAR_MAX * 1.6 : BAR_MAX, bandW - 26);
-  const plotW = n * bandW;
+  // spread bands to fill the card; only fall back to a fixed min (and scroll)
+  // when there are too many bars to fit
+  const minBand = maximized ? 120 : 70;
+  const fitPlotW = Math.max(fitW - M.left - M.right - 2, 200);
+  const bandW = Math.max(minBand, fitPlotW / n);
+  const barW = Math.min(maximized ? 160 : 104, bandW * 0.6);
+  const plotW = Math.max(n * bandW, fitPlotW);
   const width = M.left + plotW + M.right;
   const height = M.top + plotH + M.bottom;
 
@@ -53,7 +66,7 @@ export function BarChart({ title, bars, format }: Props) {
       {bars.length === 0 ? (
         <div className="chart-empty">No data yet</div>
       ) : (
-        <div className="chart-scroll">
+        <div className="chart-scroll" ref={scrollRef}>
           <svg width={width} height={height} role="img" aria-label={title}>
             {ticks.map((t) => (
               <g key={t}>
