@@ -134,11 +134,11 @@ body {
 .side-toggle:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ---------- bulk edit ---------- */
-.sel-cell, .sel-th { width: 38px; text-align: center; }
+.sel-cell, .sel-th { width: 42px; text-align: center; }
 .sel-cell input, .sel-th input, .group-check {
   accent-color: var(--accent);
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   cursor: pointer;
   vertical-align: middle;
 }
